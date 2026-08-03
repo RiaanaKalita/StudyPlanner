@@ -1,209 +1,191 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aesthetic Planner Pro</title>
+<title>Aesthetic Planner</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
 
-/* ---------------- GLOBAL ---------------- */
 :root{
-  --bg:#f6f7fb;
-  --card:#ffffff;
-  --accent:#a5b4fc;
-  --text:#2a2a2a;
+  --accent:#f5c6d6;
 }
+
+*{margin:0;padding:0;box-sizing:border-box}
 
 body{
-  margin:0;
-  font-family:"Inter", sans-serif;
-  display:flex;
-  height:100vh;
+  font-family:'Inter',sans-serif;
+  color:white;
   overflow:hidden;
-  background:var(--bg);
 }
 
-/* ---------------- SIDEBAR ---------------- */
-.sidebar{
-  width:230px;
-  background:linear-gradient(180deg,#111827,#1f2937);
-  color:white;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.logo{
-  font-size:20px;
-  font-weight:600;
-  margin-bottom:10px;
-}
-
-.nav{
-  padding:12px;
-  border-radius:12px;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-.nav:hover{
-  background:rgba(255,255,255,0.1);
-}
-
-/* ---------------- MAIN ---------------- */
-.main{
-  flex:1;
-  overflow:auto;
-  padding:20px;
-}
-
-.page{display:none;}
-.active{display:block;}
-
-/* ---------------- HOME ---------------- */
-.hero{
-  font-size:28px;
-  font-weight:600;
-}
-
-.quote{
-  opacity:0.7;
-  margin-top:5px;
-}
-
-/* ---------------- TASKS ---------------- */
-.section{
-  margin-bottom:15px;
-}
-
-.section-title{
-  font-weight:600;
-  cursor:pointer;
-}
-
-.task{
-  display:flex;
-  justify-content:space-between;
-  padding:8px;
-  margin:5px 0;
-  border-radius:10px;
-  background:#eef2ff;
-  transition:0.3s;
-}
-
-.task:hover{transform:scale(1.02);}
-
-.done{
-  text-decoration:line-through;
-  opacity:0.5;
-}
-
-button{
-  border:none;
-  background:var(--accent);
-  color:white;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* FLOAT BUTTON */
-.add{
+/* 🌄 BACKGROUND */
+#bg{
   position:fixed;
-  bottom:20px;
-  left:260px;
-  font-size:22px;
-  padding:15px;
-  border-radius:50%;
-}
-
-/* ---------------- CALENDAR ---------------- */
-.calendar{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:6px;
-  margin-top:15px;
-}
-
-.day{
-  padding:12px;
-  border-radius:10px;
-  background:white;
-  text-align:center;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-.day:hover{
-  background:#e0e7ff;
-}
-
-/* ---------------- POMODORO ---------------- */
-#pomodoro{
-  position:relative;
-  height:100%;
-  padding:0;
-}
-
-#pomodoroBg{
-  position:absolute;
   width:100%;
   height:100%;
   background-size:cover;
   background-position:center;
-  filter:brightness(0.6);
-  transition:1s;
+  z-index:-1;
+  transition:1s ease;
+  filter:brightness(0.85);
 }
 
-.pomodoro-center{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  text-align:center;
-  color:white;
+/* 🌸 SIDEBAR */
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  height:100%;
+  width:180px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);
+  padding:30px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
 }
 
-#timer{
-  font-size:90px;
-  font-weight:600;
+.logo{
+  font-family:'Playfair Display';
+  font-size:22px;
   margin-bottom:20px;
-  animation:fade 1s;
 }
 
-.controls button{
-  margin:5px;
-  font-size:16px;
-}
-
-.settings{
-  margin-top:15px;
-  opacity:0.9;
-}
-
-.theme-select{
-  margin-top:15px;
-}
-
-/* ---------------- NOTES ---------------- */
-.notebook{
-  background:#fef3c7;
-  padding:20px;
-  border-radius:15px;
-  margin-bottom:10px;
+.tab{
+  padding:10px;
+  border-radius:10px;
   cursor:pointer;
   transition:0.3s;
 }
 
-.notebook:hover{
-  transform:scale(1.03);
+.tab:hover{
+  background:rgba(255,255,255,0.15);
 }
 
-/* ---------------- ANIMATIONS ---------------- */
+.active{
+  background:var(--accent);
+  color:black;
+}
+
+/* 🪟 MAIN */
+.main{
+  margin-left:200px;
+  padding:30px;
+  height:100vh;
+  overflow-y:auto;
+}
+
+/* ✨ CARDS */
+.card{
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(20px);
+  padding:25px;
+  border-radius:20px;
+  margin-bottom:20px;
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-3px);
+}
+
+/* 🏠 HOME */
+.title{
+  font-family:'Playfair Display';
+  font-size:36px;
+}
+
+.quote{
+  margin-top:10px;
+  opacity:0.8;
+  font-style:italic;
+}
+
+/* 📋 TASK */
+.task{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
+.task input{
+  margin-right:10px;
+}
+
+.completed{
+  text-decoration:line-through;
+  opacity:0.5;
+}
+
+/* ➕ BUTTON */
+.addBtn{
+  position:fixed;
+  bottom:25px;
+  right:25px;
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  border:none;
+  font-size:30px;
+  background:var(--accent);
+  color:black;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.addBtn:hover{
+  transform:scale(1.1);
+}
+
+/* POPUP */
+.popup{
+  position:fixed;
+  bottom:100px;
+  right:25px;
+  background:white;
+  color:black;
+  padding:15px;
+  border-radius:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  animation:fade 0.3s;
+}
+
 @keyframes fade{
-  from{opacity:0;transform:translateY(10px);}
-  to{opacity:1;transform:translateY(0);}
+  from{opacity:0; transform:translateY(10px)}
+  to{opacity:1}
+}
+
+/* 🍅 POMODORO */
+.center{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:70vh;
+  flex-direction:column;
+}
+
+.timer{
+  font-size:90px;
+  font-family:'Playfair Display';
+}
+
+/* ⚙ SETTINGS */
+.settings input{
+  width:100%;
+}
+
+/* 📓 NOTES */
+.note{
+  background:white;
+  color:black;
+  padding:15px;
+  border-radius:10px;
+  margin-top:10px;
 }
 
 </style>
@@ -211,203 +193,242 @@ button{
 
 <body>
 
-<div class="sidebar">
-<div class="logo">Planner</div>
+<div id="bg"></div>
 
-<div class="nav" onclick="openPage('home')">🏠 Home</div>
-<div class="nav" onclick="openPage('tasks')">✅ Tasks</div>
-<div class="nav" onclick="openPage('pomodoro')">🍅 Focus</div>
-<div class="nav" onclick="openPage('notes')">📓 Notes</div>
+<!-- 🌸 SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">Planner</div>
+
+  <div class="tab active" onclick="switchTab('home',this)">Home</div>
+  <div class="tab" onclick="switchTab('tasks',this)">Tasks</div>
+  <div class="tab" onclick="switchTab('pomodoro',this)">Pomodoro</div>
+  <div class="tab" onclick="switchTab('notes',this)">Notes</div>
+  <div class="tab" onclick="switchTab('settings',this)">Settings</div>
 </div>
 
+<!-- 🪟 MAIN -->
 <div class="main">
 
 <!-- HOME -->
-<div id="home" class="page active">
-<div class="hero" id="date"></div>
-<div class="quote">You’re doing better than you think.</div>
+<div id="home">
+  <div class="card">
+    <div class="title" id="date"></div>
+    <div class="quote">“Small progress is still progress.” 🌷</div>
+  </div>
 
-<h3 id="monthTitle"></h3>
-<div class="calendar" id="calendar"></div>
+  <div class="card">
+    <h3>Today’s Tasks</h3>
+    <div id="preview"></div>
+  </div>
 </div>
 
 <!-- TASKS -->
-<div id="tasks" class="page">
-<div id="taskList"></div>
-<button class="add" onclick="openTaskMenu()">＋</button>
+<div id="tasks" style="display:none">
+  <div class="card">
+    <h2>To Do</h2>
+    <div id="taskList"></div>
+  </div>
 </div>
 
 <!-- POMODORO -->
-<div id="pomodoro" class="page">
-
-<div id="pomodoroBg"></div>
-
-<div class="pomodoro-center">
-<div id="timer">25:00</div>
-
-<div class="controls">
-<button onclick="startTimer()">Start</button>
-<button onclick="pauseTimer()">Pause</button>
-<button onclick="resetTimer()">Reset</button>
-</div>
-
-<div class="settings">
-Work <input id="work" value="25">
-Short <input id="short" value="5">
-Long <input id="long" value="15">
-</div>
-
-<div class="theme-select">
-<button onclick="setBg(0)">City</button>
-<button onclick="setBg(1)">Cafe</button>
-<button onclick="setBg(2)">Nature</button>
-<button onclick="setBg(3)">Tokyo</button>
-</div>
-</div>
-
+<div id="pomodoro" style="display:none">
+  <div class="center">
+    <div class="timer" id="timer">25:00</div>
+    <button onclick="start()">Start</button>
+    <button onclick="reset()">Reset</button>
+  </div>
 </div>
 
 <!-- NOTES -->
-<div id="notes" class="page">
-<div id="books"></div>
-<button class="add" onclick="addBook()">＋</button>
+<div id="notes" style="display:none">
+  <div class="card">
+    <h2>Notebook</h2>
+    <button onclick="addNote()">Add Page</button>
+    <div id="notesList"></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" style="display:none">
+  <div class="card settings">
+    <h2>Settings</h2>
+
+    <label>Accent Color</label>
+    <input type="color" onchange="setColor(this.value)">
+
+    <label>Upload Background</label>
+    <input type="file" accept="image/*" onchange="uploadBg(event)">
+
+    <button onclick="setBg(0)">Cafe</button>
+    <button onclick="setBg(1)">Beach</button>
+    <button onclick="setBg(2)">City</button>
+  </div>
 </div>
 
 </div>
+
+<button class="addBtn" onclick="openMenu()">+</button>
+<div id="menu"></div>
 
 <script>
 
-/* NAV */
-function openPage(p){
-document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
-document.getElementById(p).classList.add("active");
-}
-
-/* DATE */
-date.innerText=new Date().toDateString();
-
-/* STORAGE */
-let tasks = JSON.parse(localStorage.getItem("tasks")||"[]");
-
-/* TASK SYSTEM */
-function openTaskMenu(){
-let text=prompt("Task name");
-let date=prompt("Due date YYYY-MM-DD");
-tasks.push({text,date,done:false});
-saveTasks(); renderTasks();
-}
-
-function renderTasks(){
-taskList.innerHTML="";
-tasks.forEach((t,i)=>{
-taskList.innerHTML+=`
-<div class="task ${t.done?'done':''}">
-${t.text} (${t.date||''})
-<div>
-<button onclick="toggleTask(${i})">✔</button>
-<button onclick="deleteTask(${i})">✖</button>
-</div>
-</div>`;
-});
-}
-
-function toggleTask(i){
-tasks[i].done=!tasks[i].done;
-saveTasks(); renderTasks();
-}
-
-function deleteTask(i){
-tasks.splice(i,1);
-saveTasks(); renderTasks();
-}
-
-function saveTasks(){
-localStorage.setItem("tasks",JSON.stringify(tasks));
-}
-
-/* CALENDAR */
-function renderCalendar(){
-calendar.innerHTML="";
-let now=new Date();
-let days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-
-monthTitle.innerText=now.toLocaleString('default',{month:'long'})+" "+now.getFullYear();
-
-for(let d=1;d<=days;d++){
-calendar.innerHTML+=`<div class="day">${d}</div>`;
-}
-}
-
-/* POMODORO */
-let time=1500, interval;
-
-let backgrounds=[
-"url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb')",
-"url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085')",
-"url('https://images.unsplash.com/photo-1501785888041-af3ef285b470')",
-"url('https://images.unsplash.com/photo-1549692520-acc6669e2f0c')"
+/* 🌄 BACKGROUNDS */
+let bgs=[
+"https://images.unsplash.com/photo-1492724441997-5dc865305da7",
+"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+"https://images.unsplash.com/photo-1512453979798-5ea266f8880c"
 ];
 
 function setBg(i){
-pomodoroBg.style.backgroundImage=backgrounds[i];
+  bg.style.backgroundImage=`url(${bgs[i]})`;
+  localStorage.setItem("bg",i);
 }
 
-setBg(1);
+let saved=localStorage.getItem("bg")||0;
+setBg(saved);
 
-function startTimer(){
-clearInterval(interval);
-interval=setInterval(()=>{
-time--;
-timer.innerText=format(time);
-},1000);
+function uploadBg(e){
+ let file=e.target.files[0];
+ let reader=new FileReader();
+ reader.onload=(x)=>{
+   bg.style.backgroundImage=`url(${x.target.result})`;
+   localStorage.setItem("customBg",x.target.result);
+ }
+ reader.readAsDataURL(file);
 }
 
-function pauseTimer(){
-clearInterval(interval);
+let custom=localStorage.getItem("customBg");
+if(custom){bg.style.backgroundImage=`url(${custom})`}
+
+/* 🎨 COLOR */
+function setColor(c){
+ document.documentElement.style.setProperty("--accent",c);
+ localStorage.setItem("color",c);
+}
+let savedColor=localStorage.getItem("color");
+if(savedColor) setColor(savedColor);
+
+/* 📅 DATE */
+date.innerText=new Date().toDateString();
+
+/* 🧭 NAV */
+function switchTab(id,el){
+ document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+ el.classList.add("active");
+
+ document.querySelectorAll(".main > div").forEach(d=>d.style.display="none");
+ document.getElementById(id).style.display="block";
 }
 
-function resetTimer(){
-time=work.value*60;
-timer.innerText=format(time);
+/* 📋 TASKS */
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+
+function save(){
+ localStorage.setItem("tasks",JSON.stringify(tasks));
 }
 
-function format(t){
-let m=Math.floor(t/60);
-let s=t%60;
-return `${m}:${s<10?'0':''}${s}`;
+function render(){
+ taskList.innerHTML="";
+ preview.innerHTML="";
+
+ tasks.forEach((t,i)=>{
+  let div=document.createElement("div");
+  div.className="task"+(t.done?" completed":"");
+
+  div.innerHTML=`
+  <div>
+    <input type="checkbox" ${t.done?"checked":""} onclick="toggle(${i})">
+    ${t.text} <small>${t.date||""}</small>
+  </div>
+  <button onclick="del(${i})">x</button>`;
+
+  taskList.appendChild(div);
+
+  if(!t.done){
+    preview.innerHTML+=`<div>${t.text}</div>`;
+  }
+ });
+}
+render();
+
+function addTask(){
+ tasks.push({
+  text:text.value,
+  date:due.value,
+  done:false
+ });
+ save(); render();
+ menu.innerHTML="";
 }
 
-/* NOTES */
-let books = JSON.parse(localStorage.getItem("books")||"[]");
-
-function addBook(){
-let name=prompt("Notebook name");
-books.push({name,content:""});
-saveBooks(); renderBooks();
+function toggle(i){
+ tasks[i].done=!tasks[i].done;
+ save(); render();
 }
 
-function renderBooks(){
-booksDiv.innerHTML="";
-books.forEach((b,i)=>{
-booksDiv.innerHTML+=`
-<div class="notebook" onclick="openBook(${i})">${b.name}</div>`;
-});
+function del(i){
+ tasks.splice(i,1);
+ save(); render();
 }
 
-function openBook(i){
-let text=prompt("Write notes",books[i].content);
-books[i].content=text;
-saveBooks(); renderBooks();
+/* ➕ MENU */
+function openMenu(){
+ menu.innerHTML=`
+ <div class="popup">
+   <input id="text" placeholder="Task">
+   <input type="date" id="due">
+   <button onclick="addTask()">Add</button>
+ </div>`;
 }
 
-function saveBooks(){
-localStorage.setItem("books",JSON.stringify(books));
+/* 🍅 TIMER */
+let time=1500, int;
+
+function start(){
+ if(int) return;
+ int=setInterval(()=>{
+  time--;
+  update();
+ },1000);
 }
 
-/* INIT */
-renderTasks();
-renderCalendar();
-renderBooks();
+function reset(){
+ clearInterval(int);
+ time=1500;
+ update();
+}
+
+function update(){
+ let m=Math.floor(time/60);
+ let s=time%60;
+ timer.innerText=`${m}:${s<10?"0":""}${s}`;
+}
+
+/* 📓 NOTES */
+let notes=JSON.parse(localStorage.getItem("notes"))||[];
+
+function addNote(){
+ notes.push("");
+ saveNotes(); renderNotes();
+}
+
+function renderNotes(){
+ notesList.innerHTML="";
+ notes.forEach((n,i)=>{
+  notesList.innerHTML+=`
+  <textarea class="note" oninput="editNote(${i},this.value)">${n}</textarea>`;
+ });
+}
+renderNotes();
+
+function editNote(i,val){
+ notes[i]=val;
+ saveNotes();
+}
+
+function saveNotes(){
+ localStorage.setItem("notes",JSON.stringify(notes));
+}
 
 </script>
 
