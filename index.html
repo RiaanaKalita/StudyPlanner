@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aesthetic Planner</title>
+<style>
+:root {
+  --bg: #fdf6f0;
+  --card: #ffffff;
+  --text: #444;
+  --accent: #e8b4b8;
+}
+
+body {
+  margin:0;
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  background: var(--card);
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+nav button {
+  margin:5px;
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background: var(--accent);
+  color:white;
+  cursor:pointer;
+}
+
+.page { display:none; padding:20px; }
+.active { display:block; }
+
+.card {
+  background: var(--card);
+  padding:15px;
+  margin:10px 0;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* To-do */
+input, textarea {
+  padding:8px;
+  margin:5px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+.task {
+  display:flex;
+  justify-content:space-between;
+  margin:5px 0;
+}
+
+/* Pomodoro */
+#timer {
+  font-size:40px;
+  text-align:center;
+}
+
+/* Calendar */
+.calendar-day {
+  display:inline-block;
+  width:40px;
+  margin:3px;
+  padding:10px;
+  background: var(--card);
+  border-radius:10px;
+  cursor:pointer;
+}
+
+/* Themes */
+.theme-btn { margin:5px; }
+
+.pink { --bg:#fff0f5; --accent:#ff8fab; }
+.beige { --bg:#f5ebe0; --accent:#d4a373; }
+.blue { --bg:#eef6ff; --accent:#7aa6ff; }
+.dark { --bg:#1e1e1e; --card:#2c2c2c; --text:#eee; --accent:#888; }
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <button onclick="showPage('home')">🏠</button>
+    <button onclick="showPage('todo')">✅</button>
+    <button onclick="showPage('pomodoro')">⏱</button>
+    <button onclick="showPage('calendar')">📅</button>
+    <button onclick="showPage('notes')">📓</button>
+  </div>
+  <div>
+    🎨
+    <button class="theme-btn" onclick="setTheme('pink')">Pink</button>
+    <button class="theme-btn" onclick="setTheme('beige')">Beige</button>
+    <button class="theme-btn" onclick="setTheme('blue')">Blue</button>
+    <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
+  </div>
+</header>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="card">
+    <h2 id="date"></h2>
+    <p id="quote"></p>
+  </div>
+</div>
+
+<!-- TODO -->
+<div id="todo" class="page">
+  <div class="card">
+    <h3>To Do</h3>
+    <input id="taskInput" placeholder="Task...">
+    <input type="date" id="dueDate">
+    <button onclick="addTask()">Add</button>
+    <div id="taskList"></div>
+  </div>
+</div>
+
+<!-- POMODORO -->
+<div id="pomodoro" class="page">
+  <div class="card">
+    <h3>Pomodoro</h3>
+    <div id="timer">25:00</div>
+    <button onclick="startTimer()">Start</button>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div id="calendar" class="page">
+  <div class="card">
+    <h3>Calendar</h3>
+    <div id="calendarGrid"></div>
+    <div id="dayTasks"></div>
+  </div>
+</div>
+
+<!-- NOTES -->
+<div id="notes" class="page">
+  <div class="card">
+    <h3>Notebook</h3>
+    <input id="noteTitle" placeholder="Title">
+    <textarea id="noteContent" placeholder="Write..."></textarea>
+    <button onclick="addNote()">Save</button>
+    <div id="notesList"></div>
+  </div>
+</div>
+
+<script>
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* Theme */
+function setTheme(t){
+  document.body.className = t;
+}
+
+/* Home */
+document.getElementById("date").innerText = new Date().toDateString();
+document.getElementById("quote").innerText =
+"You're doing better than you think 🌸";
+
+/* Tasks */
+let tasks = JSON.parse(localStorage.getItem("tasks")||"[]");
+
+function addTask(){
+  let text = taskInput.value;
+  let date = dueDate.value;
+  tasks.push({text, date});
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  renderTasks();
+}
+
+function renderTasks(){
+  taskList.innerHTML="";
+  tasks.forEach(t=>{
+    let div=document.createElement("div");
+    div.className="task";
+    div.innerHTML=`${t.text} (${t.date})`;
+    taskList.appendChild(div);
+  });
+}
+renderTasks();
+
+/* Pomodoro */
+let time=1500;
+function startTimer(){
+  setInterval(()=>{
+    if(time>0){
+      time--;
+      let m=Math.floor(time/60);
+      let s=time%60;
+      timer.innerText=`${m}:${s<10?"0":""}${s}`;
+    }
+  },1000);
+}
+
+/* Calendar */
+let grid=document.getElementById("calendarGrid");
+for(let i=1;i<=30;i++){
+  let d=document.createElement("div");
+  d.className="calendar-day";
+  d.innerText=i;
+  d.onclick=()=>{
+    let dayTasks=tasks.filter(t=>t.date.endsWith("-"+String(i).padStart(2,"0")));
+    document.getElementById("dayTasks").innerText=
+      dayTasks.map(t=>t.text).join(", ") || "No tasks";
+  };
+  grid.appendChild(d);
+}
+
+/* Notes */
+let notes = JSON.parse(localStorage.getItem("notes")||"[]");
+
+function addNote(){
+  notes.push({title:noteTitle.value, content:noteContent.value});
+  localStorage.setItem("notes", JSON.stringify(notes));
+  renderNotes();
+}
+
+function renderNotes(){
+  notesList.innerHTML="";
+  notes.forEach(n=>{
+    let div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=`<h4>${n.title}</h4><p>${n.content}</p>`;
+    notesList.appendChild(div);
+  });
+}
+renderNotes();
+
+</script>
+
+</body>
+</html>
