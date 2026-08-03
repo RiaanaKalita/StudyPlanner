@@ -2,247 +2,317 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aesthetic Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Planner Pro</title>
 
 <style>
 :root{
-  --bg:#fff0f5;
-  --card:#ffffff;
-  --text:#444;
+  --bg: linear-gradient(135deg,#e0e7ff,#fce7f3);
+  --card: rgba(255,255,255,0.7);
+  --blur: blur(15px);
+  --primary:#7c83fd;
   --accent:#ff8fab;
 }
 
 body{
   margin:0;
-  font-family: "Segoe UI", sans-serif;
+  font-family:-apple-system, BlinkMacSystemFont;
   background:var(--bg);
-  color:var(--text);
 }
 
-header{
+/* PAGE */
+.page{
+  display:none;
+  padding:20px;
+  padding-bottom:90px;
+  animation:fade .3s;
+}
+.active{display:block}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1}
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  backdrop-filter:var(--blur);
+  border-radius:25px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.1);
+}
+
+/* HEADER */
+h2{margin-top:0}
+
+/* TASK */
+.task{
   display:flex;
   justify-content:space-between;
   padding:10px;
-  background:var(--card);
+  border-radius:15px;
+  margin-top:10px;
+  background:white;
 }
 
+.done{
+  text-decoration:line-through;
+  opacity:0.5;
+}
+
+/* INPUT */
+input,select{
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  margin:5px 0;
+}
+
+/* BUTTON */
 button{
   border:none;
-  padding:6px 10px;
-  margin:3px;
-  border-radius:8px;
-  background:var(--accent);
-  color:white;
-  cursor:pointer;
-}
-
-.page{display:none; padding:15px;}
-.active{display:block;}
-
-.card{
-  background:var(--card);
-  padding:12px;
   border-radius:12px;
-  margin:10px 0;
+  padding:10px 15px;
+  background:var(--primary);
+  color:white;
 }
 
-/* themes */
-.pink{--bg:#fff0f5; --accent:#ff8fab;}
-.beige{--bg:#f5ebe0; --accent:#d4a373;}
-.blue{--bg:#eef6ff; --accent:#7aa6ff;}
-.dark{--bg:#1e1e1e; --card:#2c2c2c; --text:#eee; --accent:#888;}
+/* NAV */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:white;
+  padding:10px 0;
+  box-shadow:0 -5px 20px rgba(0,0,0,0.1);
+}
+
+.nav button{
+  background:none;
+  color:#555;
+  font-size:12px;
+}
+
+.nav button.active{
+  color:var(--primary);
+}
+
+/* TIMER */
+.timer{
+  font-size:50px;
+  text-align:center;
+}
+
+/* CALENDAR */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+}
+
+.day{
+  padding:10px;
+  background:white;
+  border-radius:10px;
+  text-align:center;
+}
+
+/* NOTE */
+.note{
+  background:white;
+  border-radius:15px;
+  padding:10px;
+  margin-top:10px;
+}
 </style>
 </head>
 
 <body>
 
-<header>
-<div>
-<button onclick="nav('home')">🏠</button>
-<button onclick="nav('todo')">✅</button>
-<button onclick="nav('calendar')">📅</button>
-<button onclick="nav('pomodoro')">⏱</button>
-<button onclick="nav('notes')">📓</button>
-</div>
-
-<div>
-<button onclick="theme('pink')">🌸</button>
-<button onclick="theme('beige')">🤍</button>
-<button onclick="theme('blue')">🌊</button>
-<button onclick="theme('dark')">🌙</button>
-</div>
-</header>
-
 <!-- HOME -->
 <div id="home" class="page active">
-<div class="card">
-<h2 id="date"></h2>
-<p id="quote"></p>
-</div>
+  <div class="card">
+    <h2 id="date"></h2>
+    <p>You’re doing better than you think 💖</p>
+  </div>
+
+  <div class="card">
+    <h3>Today's Tasks</h3>
+    <div id="today"></div>
+  </div>
 </div>
 
 <!-- TODO -->
 <div id="todo" class="page">
-<div class="card">
-<input id="listName" placeholder="New List (e.g. Math)">
-<button onclick="addList()">Add List</button>
-<div id="lists"></div>
-</div>
+  <div class="card">
+    <h2>Tasks</h2>
+
+    <input id="taskInput" placeholder="Task">
+    <input type="date" id="dueDate">
+    <button onclick="addTask()">Add</button>
+
+    <div id="taskList"></div>
+  </div>
 </div>
 
 <!-- CALENDAR -->
 <div id="calendar" class="page">
-<div class="card">
-<div id="cal"></div>
-<div id="calTasks"></div>
-</div>
+  <div class="card">
+    <h2>Calendar</h2>
+    <div class="grid" id="cal"></div>
+  </div>
 </div>
 
 <!-- POMODORO -->
 <div id="pomodoro" class="page">
-<div class="card">
-<input id="focus" type="number" value="25"> Focus
-<input id="break" type="number" value="5"> Break
-<div id="timer">25:00</div>
-<button onclick="start()">Start</button>
-<button onclick="reset()">Reset</button>
-</div>
+  <div class="card">
+    <h2>Pomodoro</h2>
+
+    <div class="timer" id="timer">25:00</div>
+
+    <input id="minutes" type="number" placeholder="Minutes">
+    <button onclick="start()">Start</button>
+    <button onclick="reset()">Reset</button>
+  </div>
 </div>
 
 <!-- NOTES -->
 <div id="notes" class="page">
-<div class="card">
-<input id="noteTitle" placeholder="Title">
-<textarea id="noteText"></textarea>
-<button onclick="saveNote()">Save</button>
-<div id="noteList"></div>
+  <div class="card">
+    <h2>Notes</h2>
+
+    <input id="ntitle" placeholder="Title">
+    <input id="ntext" placeholder="Write note">
+    <button onclick="saveNote()">Save</button>
+
+    <div id="notesList"></div>
+  </div>
 </div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="nav('home',this)" class="active">🏠 Home</button>
+  <button onclick="nav('todo',this)">✔ Tasks</button>
+  <button onclick="nav('calendar',this)">📅 Calendar</button>
+  <button onclick="nav('pomodoro',this)">⏱ Focus</button>
+  <button onclick="nav('notes',this)">📓 Notes</button>
 </div>
 
 <script>
 
 /* NAV */
-function nav(id){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.getElementById(id).classList.add('active');
+function nav(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
 }
 
-/* THEME */
-function theme(t){ document.body.className=t; }
-
-/* HOME */
-const quotes=[
-"You’re doing amazing 🌸",
-"Small steps still count 🤍",
-"Stay consistent, not perfect ✨"
-];
+/* DATE */
 date.innerText=new Date().toDateString();
-quote.innerText=quotes[Math.floor(Math.random()*quotes.length)];
 
-/* STORAGE */
-let data=JSON.parse(localStorage.getItem("planner")||"{}");
-if(!data.lists)data.lists=[];
-if(!data.notes)data.notes=[];
+/* TASKS */
+let tasks=JSON.parse(localStorage.getItem("tasks")||"[]");
 
-/* TODO LIST */
-function addList(){
-let name=listName.value;
-data.lists.push({name,tasks:[]});
-save();
-renderLists();
+function addTask(){
+  tasks.push({
+    text:taskInput.value,
+    date:dueDate.value,
+    done:false
+  });
+  save();
+  render();
 }
 
-function addTask(i){
-let text=prompt("Task?");
-let date=prompt("Due date YYYY-MM-DD?");
-data.lists[i].tasks.push({text,date,done:false});
-save();
-renderLists();
+function toggle(i){
+  tasks[i].done=!tasks[i].done;
+  save(); render();
 }
 
-function toggleTask(i,j){
-data.lists[i].tasks[j].done=!data.lists[i].tasks[j].done;
-save(); renderLists();
+function del(i){
+  tasks.splice(i,1);
+  save(); render();
 }
 
-function renderLists(){
-lists.innerHTML="";
-data.lists.forEach((l,i)=>{
-let div=document.createElement("div");
-div.className="card";
-div.innerHTML=`<h3>${l.name}</h3>
-<button onclick="addTask(${i})">+ Task</button>`;
-l.tasks.forEach((t,j)=>{
-let task=document.createElement("div");
-task.innerHTML=`
-<span style="text-decoration:${t.done?'line-through':'none'}">${t.text} (${t.date})</span>
-<button onclick="toggleTask(${i},${j})">✔</button>`;
-div.appendChild(task);
-});
-lists.appendChild(div);
-});
+function render(){
+  let html="";
+  tasks.forEach((t,i)=>{
+    html+=`
+    <div class="task ${t.done?'done':''}">
+      ${t.text} (${t.date||''})
+      <div>
+        <button onclick="toggle(${i})">✔</button>
+        <button onclick="del(${i})">✖</button>
+      </div>
+    </div>`;
+  });
+  taskList.innerHTML=html;
+  today.innerHTML=html;
 }
-renderLists();
+
+function save(){
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+}
+
+render();
 
 /* CALENDAR */
-for(let i=1;i<=30;i++){
-let d=document.createElement("button");
-d.innerText=i;
-d.onclick=()=>{
-let day=String(i).padStart(2,"0");
-let tasks=[];
-data.lists.forEach(l=>{
-l.tasks.forEach(t=>{
-if(t.date && t.date.endsWith("-"+day)) tasks.push(t.text);
-});
-});
-calTasks.innerText=tasks.join(", ") || "No tasks";
-};
-cal.appendChild(d);
+for(let i=1;i<=31;i++){
+  let d=document.createElement("div");
+  d.className="day";
+  d.innerText=i;
+  cal.appendChild(d);
 }
 
-/* POMODORO */
-let interval, time=1500;
+/* TIMER */
+let t=1500, inter;
 
 function start(){
-clearInterval(interval);
-time=focus.value*60;
-interval=setInterval(()=>{
-if(time>0){
-time--;
-let m=Math.floor(time/60);
-let s=time%60;
-timer.innerText=`${m}:${s<10?'0':''}${s}`;
-}
-},1000);
+  let m=document.getElementById("minutes").value;
+  if(m) t=m*60;
+
+  clearInterval(inter);
+  inter=setInterval(()=>{
+    if(t<=0)return clearInterval(inter);
+    t--;
+    timer.innerText=
+      Math.floor(t/60)+":"+(t%60<10?"0":"")+t%60;
+  },1000);
 }
 
 function reset(){
-clearInterval(interval);
-timer.innerText="00:00";
+  clearInterval(inter);
+  t=1500;
+  timer.innerText="25:00";
 }
 
 /* NOTES */
+let notes=JSON.parse(localStorage.getItem("notes")||"[]");
+
 function saveNote(){
-data.notes.push({title:noteTitle.value,text:noteText.value});
-save(); renderNotes();
+  notes.push({t:ntitle.value,c:ntext.value});
+  localStorage.setItem("notes",JSON.stringify(notes));
+  renderNotes();
 }
 
 function renderNotes(){
-noteList.innerHTML="";
-data.notes.forEach((n,i)=>{
-let div=document.createElement("div");
-div.className="card";
-div.innerHTML=`⭐ <b>${n.title}</b><p>${n.text}</p>`;
-noteList.appendChild(div);
-});
+  notesList.innerHTML="";
+  notes.forEach(n=>{
+    notesList.innerHTML+=`
+    <div class="note">
+      <b>${n.t}</b>
+      <p>${n.c}</p>
+    </div>`;
+  });
 }
-renderNotes();
 
-/* SAVE */
-function save(){
-localStorage.setItem("planner",JSON.stringify(data));
-}
+renderNotes();
 
 </script>
 
