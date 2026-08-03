@@ -1,83 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Planner Pro</title>
+<title>Aesthetic Planner Pro</title>
 
 <style>
 :root{
   --bg: linear-gradient(135deg,#e0e7ff,#fce7f3);
   --card: rgba(255,255,255,0.7);
-  --blur: blur(15px);
-  --primary:#7c83fd;
-  --accent:#ff8fab;
 }
 
 body{
   margin:0;
-  font-family:-apple-system, BlinkMacSystemFont;
+  font-family:-apple-system;
   background:var(--bg);
 }
 
-/* PAGE */
-.page{
-  display:none;
-  padding:20px;
-  padding-bottom:90px;
-  animation:fade .3s;
-}
+/* PAGES */
+.page{display:none;padding:20px;padding-bottom:90px;}
 .active{display:block}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1}
-}
 
 /* CARD */
 .card{
   background:var(--card);
-  backdrop-filter:var(--blur);
+  backdrop-filter:blur(15px);
   border-radius:25px;
   padding:20px;
   margin-bottom:20px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.1);
-}
-
-/* HEADER */
-h2{margin-top:0}
-
-/* TASK */
-.task{
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  border-radius:15px;
-  margin-top:10px;
-  background:white;
-}
-
-.done{
-  text-decoration:line-through;
-  opacity:0.5;
-}
-
-/* INPUT */
-input,select{
-  padding:10px;
-  border:none;
-  border-radius:12px;
-  margin:5px 0;
-}
-
-/* BUTTON */
-button{
-  border:none;
-  border-radius:12px;
-  padding:10px 15px;
-  background:var(--primary);
-  color:white;
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
 
 /* NAV */
@@ -89,20 +39,62 @@ button{
   justify-content:space-around;
   background:white;
   padding:10px 0;
-  box-shadow:0 -5px 20px rgba(0,0,0,0.1);
 }
 
-.nav button{
-  background:none;
-  color:#555;
-  font-size:12px;
+/* BUTTON */
+button{
+  border:none;
+  padding:8px 12px;
+  border-radius:10px;
+  background:#7c83fd;
+  color:white;
 }
 
-.nav button.active{
-  color:var(--primary);
+/* FLOAT BUTTON */
+.fab{
+  position:fixed;
+  bottom:90px;
+  right:20px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#7c83fd;
+  color:white;
+  font-size:30px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-/* TIMER */
+/* TASK */
+.section{
+  margin-top:10px;
+}
+.sectionHeader{
+  font-weight:bold;
+  cursor:pointer;
+}
+.task{
+  display:flex;
+  justify-content:space-between;
+  margin-left:10px;
+}
+
+/* NOTEBOOK */
+#notebookGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.notebook{
+  height:100px;
+  border-radius:15px;
+  display:flex;
+  align-items:end;
+  padding:10px;
+}
+
+/* POMODORO */
 .timer{
   font-size:50px;
   text-align:center;
@@ -114,20 +106,20 @@ button{
   grid-template-columns:repeat(7,1fr);
   gap:5px;
 }
-
 .day{
-  padding:10px;
   background:white;
+  padding:8px;
   border-radius:10px;
   text-align:center;
 }
 
-/* NOTE */
-.note{
+/* NOTEBOOK VIEW */
+.pageArea{
+  height:60vh;
   background:white;
   border-radius:15px;
   padding:10px;
-  margin-top:10px;
+  overflow:auto;
 }
 </style>
 </head>
@@ -136,183 +128,224 @@ button{
 
 <!-- HOME -->
 <div id="home" class="page active">
-  <div class="card">
-    <h2 id="date"></h2>
-    <p>You’re doing better than you think 💖</p>
-  </div>
-
-  <div class="card">
-    <h3>Today's Tasks</h3>
-    <div id="today"></div>
-  </div>
+<div class="card">
+<h2 id="date"></h2>
+<p>✨ “You’re becoming the version of you that you needed.”</p>
 </div>
 
-<!-- TODO -->
-<div id="todo" class="page">
-  <div class="card">
-    <h2>Tasks</h2>
-
-    <input id="taskInput" placeholder="Task">
-    <input type="date" id="dueDate">
-    <button onclick="addTask()">Add</button>
-
-    <div id="taskList"></div>
-  </div>
+<div class="card">
+<h3>Calendar</h3>
+<div class="grid" id="homeCal"></div>
 </div>
 
-<!-- CALENDAR -->
-<div id="calendar" class="page">
-  <div class="card">
-    <h2>Calendar</h2>
-    <div class="grid" id="cal"></div>
-  </div>
+<div class="card">
+<h3>Today</h3>
+<div id="todayTasks"></div>
+</div>
 </div>
 
-<!-- POMODORO -->
-<div id="pomodoro" class="page">
-  <div class="card">
-    <h2>Pomodoro</h2>
-
-    <div class="timer" id="timer">25:00</div>
-
-    <input id="minutes" type="number" placeholder="Minutes">
-    <button onclick="start()">Start</button>
-    <button onclick="reset()">Reset</button>
-  </div>
+<!-- TASKS -->
+<div id="tasks" class="page">
+<div class="card">
+<h2>Planner</h2>
+<div id="sections"></div>
+<div id="noSection"></div>
+<div class="card"><h3>Completed</h3><div id="done"></div></div>
+</div>
+<div class="fab" onclick="addOption()">＋</div>
 </div>
 
 <!-- NOTES -->
 <div id="notes" class="page">
-  <div class="card">
-    <h2>Notes</h2>
+<div id="notebookGrid"></div>
+<div class="fab" onclick="createNotebook()">＋</div>
+</div>
 
-    <input id="ntitle" placeholder="Title">
-    <input id="ntext" placeholder="Write note">
-    <button onclick="saveNote()">Save</button>
+<div id="notebookView" class="page">
+<div class="card">
+<div id="pageArea" contenteditable="true" class="pageArea"></div>
+<button onclick="prev()">◀</button>
+<button onclick="next()">▶</button>
+<button onclick="addPage()">＋</button>
+<input type="file" onchange="imgAdd(event)">
+<button onclick="back()">Back</button>
+</div>
+</div>
 
-    <div id="notesList"></div>
-  </div>
+<!-- POMODORO -->
+<div id="pomodoro" class="page">
+<div class="card" id="pomoCard">
+<h2>Pomodoro</h2>
+
+<select id="mode">
+<option value="1500">Work</option>
+<option value="300">Short Break</option>
+<option value="900">Long Break</option>
+</select>
+
+<div class="timer" id="timer">25:00</div>
+
+<button onclick="start()">Start</button>
+<button onclick="reset()">Reset</button>
+
+<select onchange="bgChange(this.value)">
+<option>City</option>
+<option>Garden</option>
+<option>Pond</option>
+<option>Tokyo</option>
+</select>
+
+<input type="file" onchange="customBg(event)">
+</div>
 </div>
 
 <!-- NAV -->
 <div class="nav">
-  <button onclick="nav('home',this)" class="active">🏠 Home</button>
-  <button onclick="nav('todo',this)">✔ Tasks</button>
-  <button onclick="nav('calendar',this)">📅 Calendar</button>
-  <button onclick="nav('pomodoro',this)">⏱ Focus</button>
-  <button onclick="nav('notes',this)">📓 Notes</button>
+<button onclick="nav('home')">🏠</button>
+<button onclick="nav('tasks')">✔</button>
+<button onclick="nav('notes')">📓</button>
+<button onclick="nav('pomodoro')">⏱</button>
 </div>
 
 <script>
 
 /* NAV */
-function nav(id,btn){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+function nav(p){
+document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.getElementById(p).classList.add('active');
 }
 
 /* DATE */
 date.innerText=new Date().toDateString();
 
-/* TASKS */
-let tasks=JSON.parse(localStorage.getItem("tasks")||"[]");
-
-function addTask(){
-  tasks.push({
-    text:taskInput.value,
-    date:dueDate.value,
-    done:false
-  });
-  save();
-  render();
+/* CALENDAR */
+for(let i=1;i<=30;i++){
+let d=document.createElement("div");
+d.className="day";
+d.innerText=i;
+homeCal.appendChild(d);
 }
 
-function toggle(i){
-  tasks[i].done=!tasks[i].done;
-  save(); render();
-}
+/* TASK SYSTEM */
+let data=JSON.parse(localStorage.getItem("data")||"[]");
 
-function del(i){
-  tasks.splice(i,1);
-  save(); render();
+function addOption(){
+let type=prompt("section or task?");
+if(type=="section"){
+data.push({type:"section",name:prompt("Name"),open:true,tasks:[]});
+}else{
+data.push({type:"task",text:prompt("Task"),done:false});
+}
+save();render();
 }
 
 function render(){
-  let html="";
-  tasks.forEach((t,i)=>{
-    html+=`
-    <div class="task ${t.done?'done':''}">
-      ${t.text} (${t.date||''})
-      <div>
-        <button onclick="toggle(${i})">✔</button>
-        <button onclick="del(${i})">✖</button>
-      </div>
-    </div>`;
-  });
-  taskList.innerHTML=html;
-  today.innerHTML=html;
+sections.innerHTML="";
+noSection.innerHTML="";
+done.innerHTML="";
+
+data.forEach((d,i)=>{
+if(d.type=="section"){
+let html=`<div class="section">
+<div class="sectionHeader" onclick="toggle(${i})">${d.name}</div>`;
+if(d.open){
+d.tasks.forEach((t,ti)=>{
+html+=`<div class="task">${t.text}
+<button onclick="doneTask(${i},${ti})">✔</button></div>`;
+});
+}
+html+="</div>";
+sections.innerHTML+=html;
+}else{
+if(d.done){
+done.innerHTML+=d.text+"<br>";
+}else{
+noSection.innerHTML+=`<div class="task">${d.text}
+<button onclick="doneSingle(${i})">✔</button></div>`;
+}
+}
+});
 }
 
-function save(){
-  localStorage.setItem("tasks",JSON.stringify(tasks));
-}
-
+function toggle(i){data[i].open=!data[i].open;save();render();}
+function doneTask(i,ti){data[i].tasks[ti].done=true;save();render();}
+function doneSingle(i){data[i].done=true;save();render();}
+function save(){localStorage.setItem("data",JSON.stringify(data));}
 render();
 
-/* CALENDAR */
-for(let i=1;i<=31;i++){
-  let d=document.createElement("div");
-  d.className="day";
-  d.innerText=i;
-  cal.appendChild(d);
+/* NOTEBOOK SYSTEM */
+let nbs=JSON.parse(localStorage.getItem("nbs")||"[]");
+let cur=0,pg=0;
+
+function createNotebook(){
+let title=prompt("Title?");
+let color=prompt("Color?");
+nbs.push({title,color,pages:[""]});
+saveNB();renderNB();
 }
 
-/* TIMER */
-let t=1500, inter;
+function renderNB(){
+notebookGrid.innerHTML="";
+nbs.forEach((n,i)=>{
+notebookGrid.innerHTML+=`<div class="notebook" style="background:${n.color}" onclick="openNB(${i})">${n.title}</div>`;
+});
+}
+renderNB();
+
+function openNB(i){
+cur=i;pg=0;
+nav('notebookView');
+load();
+}
+
+function load(){
+pageArea.innerHTML=nbs[cur].pages[pg];
+}
+
+function savePage(){
+nbs[cur].pages[pg]=pageArea.innerHTML;
+saveNB();
+}
+
+function next(){savePage();pg++;if(!nbs[cur].pages[pg])nbs[cur].pages[pg]="";load();}
+function prev(){if(pg>0){savePage();pg--;load();}}
+function addPage(){nbs[cur].pages.push("");pg=nbs[cur].pages.length-1;load();}
+function imgAdd(e){
+let r=new FileReader();
+r.onload=()=>{pageArea.innerHTML+=`<img src="${r.result}" style="max-width:100%">`;savePage();}
+r.readAsDataURL(e.target.files[0]);
+}
+function back(){nav('notes');}
+function saveNB(){localStorage.setItem("nbs",JSON.stringify(nbs));}
+
+/* POMODORO */
+let t=1500,int;
 
 function start(){
-  let m=document.getElementById("minutes").value;
-  if(m) t=m*60;
+t=parseInt(mode.value);
+clearInterval(int);
+int=setInterval(()=>{
+if(t<=0)return clearInterval(int);
+t--;
+timer.innerText=Math.floor(t/60)+":"+(t%60<10?"0":"")+t%60;
+},1000);
+}
+function reset(){t=1500;timer.innerText="25:00";}
 
-  clearInterval(inter);
-  inter=setInterval(()=>{
-    if(t<=0)return clearInterval(inter);
-    t--;
-    timer.innerText=
-      Math.floor(t/60)+":"+(t%60<10?"0":"")+t%60;
-  },1000);
+/* BG */
+function bgChange(v){
+if(v=="City")pomoCard.style.background="url(https://images.unsplash.com/photo-1494526585095-c41746248156)";
+if(v=="Garden")pomoCard.style.background="url(https://images.unsplash.com/photo-1501004318641-b39e6451bec6)";
+if(v=="Pond")pomoCard.style.background="url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e)";
+if(v=="Tokyo")pomoCard.style.background="url(https://images.unsplash.com/photo-1549692520-acc6669e2f0c)";
+pomoCard.style.backgroundSize="cover";
 }
 
-function reset(){
-  clearInterval(inter);
-  t=1500;
-  timer.innerText="25:00";
+function customBg(e){
+let r=new FileReader();
+r.onload=()=>pomoCard.style.background=`url(${r.result})`;
+r.readAsDataURL(e.target.files[0]);
 }
-
-/* NOTES */
-let notes=JSON.parse(localStorage.getItem("notes")||"[]");
-
-function saveNote(){
-  notes.push({t:ntitle.value,c:ntext.value});
-  localStorage.setItem("notes",JSON.stringify(notes));
-  renderNotes();
-}
-
-function renderNotes(){
-  notesList.innerHTML="";
-  notes.forEach(n=>{
-    notesList.innerHTML+=`
-    <div class="note">
-      <b>${n.t}</b>
-      <p>${n.c}</p>
-    </div>`;
-  });
-}
-
-renderNotes();
 
 </script>
 
