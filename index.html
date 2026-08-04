@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Planner</title>
@@ -9,29 +9,23 @@
   --accent: rgba(255,255,255,0.2);
 }
 
-*{
-  box-sizing:border-box;
-  margin:0;
-  font-family: "SF Pro Display", sans-serif;
-}
-
 body{
-  height:100vh;
-  display:flex;
+  margin:0;
+  font-family:"SF Pro Display", sans-serif;
+  color:white;
   background-size:cover;
   background-position:center;
-  color:white;
-  overflow:hidden;
+  display:flex;
+  height:100vh;
 }
 
 /* SIDEBAR */
 .sidebar{
-  width:200px;
-  backdrop-filter: blur(20px);
-  background: var(--accent);
+  width:220px;
+  backdrop-filter:blur(20px);
+  background:var(--accent);
   padding:20px;
 }
-
 .sidebar div{
   margin:15px 0;
   cursor:pointer;
@@ -40,26 +34,53 @@ body{
 /* MAIN */
 .main{
   flex:1;
-  padding:30px;
+  padding:25px;
   overflow:auto;
 }
 
-/* CENTER POMODORO */
-.center{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100%;
-  flex-direction:column;
+/* HOME */
+.quote{
+  backdrop-filter:blur(20px);
+  padding:20px;
+  border-radius:20px;
+  margin-bottom:20px;
+  font-size:18px;
 }
 
-.timer{
-  font-size:80px;
-  font-weight:200;
-  transition:0.3s;
+.date{
+  font-size:28px;
+  margin-bottom:10px;
 }
 
-/* ADD BUTTON */
+/* CALENDAR */
+.calendar{
+  backdrop-filter:blur(20px);
+  padding:15px;
+  border-radius:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+}
+
+.day{
+  padding:10px;
+  text-align:center;
+  border-radius:10px;
+  cursor:pointer;
+}
+.day:hover{
+  background:rgba(255,255,255,0.2);
+}
+
+/* TASK LIST */
+.taskList{
+  margin-top:15px;
+}
+
+/* BUTTON */
 .addBtn{
   position:fixed;
   bottom:30px;
@@ -74,48 +95,38 @@ body{
   color:black;
 }
 
-/* POPUP */
-#popup{
-  position:fixed;
-  bottom:100px;
-  right:30px;
+/* POMODORO */
+.timer{
+  font-size:80px;
+  text-align:center;
+  margin-top:100px;
+  transition:0.3s;
+}
+.glow{
+  text-shadow:0 0 20px rgba(255,255,255,0.8);
+}
+
+/* NOTEBOOK */
+.notebook{
+  width:150px;
+  height:200px;
+  border-radius:15px;
+  margin:10px;
+  display:inline-block;
+  padding:10px;
+  cursor:pointer;
+}
+
+/* EDITOR */
+.editor{
+  height:80vh;
   background:white;
   color:black;
-  border-radius:12px;
-  display:none;
-  overflow:hidden;
-}
-
-#popup div{
-  padding:12px 20px;
-  cursor:pointer;
-}
-#popup div:hover{
-  background:#eee;
-}
-
-/* NOTES */
-.section{
-  margin-top:15px;
-  backdrop-filter: blur(15px);
-  padding:10px;
-  border-radius:10px;
-}
-
-.section-title{
-  display:flex;
-  justify-content:space-between;
-  cursor:pointer;
-}
-
-.taskItem{
-  display:flex;
-  justify-content:space-between;
-  margin:5px 0;
+  padding:20px;
 }
 
 /* SETTINGS */
-.settings input{
+select,input{
   margin:10px 0;
 }
 </style>
@@ -125,45 +136,73 @@ body{
 
 <div class="sidebar">
   <div onclick="show('home')">Home</div>
-  <div onclick="show('notes')">Planner</div>
+  <div onclick="show('tasks')">Tasks</div>
+  <div onclick="show('pomodoro')">Pomodoro</div>
+  <div onclick="show('notes')">Notes</div>
   <div onclick="show('settings')">Settings</div>
 </div>
 
 <div class="main">
 
-  <!-- HOME -->
-  <div id="home" class="center">
-    <div class="timer" id="timer">25:00</div>
-    <button onclick="startTimer()">Start</button>
+<!-- HOME -->
+<div id="home">
+  <div class="quote" id="quote"></div>
+  <div class="date" id="date"></div>
+
+  <div class="calendar">
+    <div id="month"></div>
+    <div class="grid" id="calendarGrid"></div>
   </div>
 
-  <!-- NOTES -->
-  <div id="notes" style="display:none">
-    <h2>Planner</h2>
-    <div id="sections"></div>
-  </div>
+  <div class="taskList" id="dayTasks"></div>
+</div>
 
-  <!-- SETTINGS -->
-  <div id="settings" style="display:none" class="settings">
-    <h2>Settings</h2>
+<!-- TASKS -->
+<div id="tasks" style="display:none">
+  <h2>Tasks</h2>
+  <div id="taskSections"></div>
+</div>
 
-    <p>Background</p>
-    <input type="file" onchange="uploadBg(event)">
+<!-- POMODORO -->
+<div id="pomodoro" style="display:none">
+  <div class="timer glow" id="timer">25:00</div>
+  <button onclick="startTimer()">Start</button>
 
-    <p>Accent</p>
-    <input type="color" onchange="setAccent(this.value)">
-  </div>
+  <h3>Settings</h3>
+  Focus <input type="number" id="focus" value="25"><br>
+  Short <input type="number" id="short" value="5"><br>
+  Long <input type="number" id="long" value="15"><br>
+
+  <input type="file" onchange="uploadPomodoroBg(event)">
+</div>
+
+<!-- NOTES -->
+<div id="notes" style="display:none">
+  <h2>Notebooks</h2>
+  <div id="notebooks"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" style="display:none">
+  <h2>Settings</h2>
+
+  <p>Background Preset</p>
+  <select onchange="setBgPreset(this.value)">
+    <option value="">Default</option>
+    <option value="https://images.unsplash.com/photo-1507525428034-b723cf961d3e">Ocean</option>
+    <option value="https://images.unsplash.com/photo-1492724441997-5dc865305da7">Sky</option>
+  </select>
+
+  <p>Upload Background</p>
+  <input type="file" onchange="uploadBg(event)">
+
+  <p>Accent</p>
+  <input type="color" onchange="setAccent(this.value)">
+</div>
 
 </div>
 
-<!-- ADD BUTTON -->
-<button class="addBtn" onclick="togglePopup()">+</button>
-
-<!-- POPUP -->
-<div id="popup">
-  <div onclick="createTaskUI()">Task</div>
-  <div onclick="createSection()">Section</div>
-</div>
+<button class="addBtn" id="addBtn" onclick="addTask()">+</button>
 
 <script>
 
@@ -171,152 +210,118 @@ body{
 function show(id){
   document.querySelectorAll(".main > div").forEach(d=>d.style.display="none");
   document.getElementById(id).style.display="block";
+
+  document.getElementById("addBtn").style.display = id==="tasks" ? "block" : "none";
+}
+
+/* QUOTE */
+const quotes=[
+"you’re doing better than you think 🌸",
+"small steps still matter ✨",
+"rest is productive too 💗"
+];
+document.getElementById("quote").innerText=
+quotes[Math.floor(Math.random()*quotes.length)];
+
+/* DATE */
+let today=new Date();
+document.getElementById("date").innerText=
+today.toDateString();
+
+/* CALENDAR */
+function renderCalendar(){
+  let grid=document.getElementById("calendarGrid");
+  grid.innerHTML="";
+  let days=30;
+
+  for(let i=1;i<=days;i++){
+    let d=document.createElement("div");
+    d.className="day";
+    d.innerText=i;
+
+    d.onclick=()=>showTasksForDay(i);
+    grid.appendChild(d);
+  }
+}
+renderCalendar();
+
+/* TASKS */
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+
+function addTask(){
+  let text=prompt("Task?");
+  let date=prompt("Day (1-30)");
+  tasks.push({text,date});
+  save();
+}
+
+function showTasksForDay(day){
+  let list=document.getElementById("dayTasks");
+  list.innerHTML="<h3>Tasks</h3>";
+
+  tasks.filter(t=>t.date==day).forEach(t=>{
+    let div=document.createElement("div");
+    div.innerText=t.text;
+    list.appendChild(div);
+  });
+}
+
+/* SAVE */
+function save(){
+  localStorage.setItem("tasks",JSON.stringify(tasks));
 }
 
 /* TIMER */
 let time=1500;
-let running=false;
-
 function startTimer(){
-  if(running) return;
-  running=true;
-
-  let interval=setInterval(()=>{
+  setInterval(()=>{
     time--;
     let m=Math.floor(time/60);
     let s=time%60;
     document.getElementById("timer").innerText=
-      `${m}:${s<10?"0":""}${s}`;
-
-    if(time<=0){
-      clearInterval(interval);
-      running=false;
-      time=1500;
-    }
+    `${m}:${s<10?"0":""}${s}`;
   },1000);
 }
 
-/* POPUP */
-function togglePopup(){
-  let p=document.getElementById("popup");
-  p.style.display = p.style.display==="block" ? "none" : "block";
-}
-
-/* NOTES DATA */
-let sections = JSON.parse(localStorage.getItem("sections")) || [];
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-/* SAVE */
-function save(){
-  localStorage.setItem("sections", JSON.stringify(sections));
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-}
-
-/* CREATE SECTION */
-function createSection(){
-  let name = prompt("Section name");
-  if(!name) return;
-
-  sections.push({id:Date.now(), name});
-  save();
-  render();
-}
-
-/* CREATE TASK */
-function createTaskUI(sectionId=null){
-  togglePopup();
-
-  let text = prompt("Task?");
-  if(!text) return;
-
-  let date = prompt("Due date YYYY-MM-DD");
-
-  tasks.push({
-    id:Date.now(),
-    text,
-    date,
-    sectionId
-  });
-
-  save();
-  render();
-}
-
-/* RENDER */
-function render(){
-  let container=document.getElementById("sections");
-  container.innerHTML="";
-
-  sections.forEach(sec=>{
-    let div=document.createElement("div");
-    div.className="section";
-
-    div.innerHTML=`
-      <div class="section-title">
-        ${sec.name}
-        <button onclick="createTaskUI(${sec.id})">+</button>
-      </div>
-      <div id="tasks-${sec.id}"></div>
-    `;
-
-    container.appendChild(div);
-
-    let taskDiv=document.getElementById(`tasks-${sec.id}`);
-
-    tasks.filter(t=>t.sectionId===sec.id)
-    .forEach(t=>{
-      let el=document.createElement("div");
-      el.className="taskItem";
-
-      el.innerHTML=`
-        <span>${t.text}</span>
-        <input type="date" value="${t.date||""}" 
-        onchange="updateDate(${t.id}, this.value)">
-      `;
-
-      taskDiv.appendChild(el);
-    });
-  });
-}
-
-/* UPDATE DATE */
-function updateDate(id, val){
-  let t=tasks.find(x=>x.id===id);
-  t.date=val;
-  save();
-}
-
-/* SETTINGS */
+/* BACKGROUNDS */
 function uploadBg(e){
-  let file=e.target.files[0];
-  let reader=new FileReader();
-
-  reader.onload=function(){
-    document.body.style.backgroundImage=`url(${reader.result})`;
-    localStorage.setItem("bg", reader.result);
+  let r=new FileReader();
+  r.onload=()=>{
+    document.body.style.backgroundImage=`url(${r.result})`;
+    localStorage.setItem("bg",r.result);
   };
-
-  reader.readAsDataURL(file);
+  r.readAsDataURL(e.target.files[0]);
 }
 
+function setBgPreset(url){
+  document.body.style.backgroundImage=`url(${url})`;
+  localStorage.setItem("bg",url);
+}
+
+function uploadPomodoroBg(e){
+  let r=new FileReader();
+  r.onload=()=>{
+    document.getElementById("pomodoro").style.backgroundImage=`url(${r.result})`;
+  };
+  r.readAsDataURL(e.target.files[0]);
+}
+
+/* ACCENT */
 function setAccent(c){
-  document.documentElement.style.setProperty("--accent", hexToRGBA(c, 0.25));
+  document.documentElement.style.setProperty("--accent",hexToRGBA(c,0.25));
 }
-
-function hexToRGBA(hex, alpha){
+function hexToRGBA(hex,a){
   let r=parseInt(hex.slice(1,3),16);
   let g=parseInt(hex.slice(3,5),16);
   let b=parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${alpha})`;
+  return `rgba(${r},${g},${b},${a})`;
 }
 
 /* LOAD */
-window.onload=function(){
+window.onload=()=>{
   let bg=localStorage.getItem("bg");
   if(bg) document.body.style.backgroundImage=`url(${bg})`;
-
-  render();
-}
+};
 
 </script>
 
