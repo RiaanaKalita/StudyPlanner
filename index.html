@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aesthetic Planner</title>
+<title>Aesthetic iPad Planner</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
 
 :root{
-  --accent:#f5c6d6;
+  --accent: rgba(255,255,255,0.2);
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -28,7 +28,7 @@ body{
   background-size:cover;
   background-position:center;
   z-index:-1;
-  transition:1s ease;
+  transition:1s;
   filter:brightness(0.85);
 }
 
@@ -38,18 +38,19 @@ body{
   left:0;
   top:0;
   height:100%;
-  width:180px;
-  background:rgba(255,255,255,0.08);
+  width:200px;
   backdrop-filter:blur(20px);
-  padding:30px 20px;
+  background:var(--accent);
+  padding:30px;
   display:flex;
   flex-direction:column;
-  gap:20px;
+  gap:15px;
+  transition:0.3s;
 }
 
 .logo{
   font-family:'Playfair Display';
-  font-size:22px;
+  font-size:24px;
   margin-bottom:20px;
 }
 
@@ -57,70 +58,35 @@ body{
   padding:10px;
   border-radius:10px;
   cursor:pointer;
-  transition:0.3s;
 }
 
-.tab:hover{
-  background:rgba(255,255,255,0.15);
-}
-
-.active{
-  background:var(--accent);
-  color:black;
-}
+.tab:hover{background:rgba(255,255,255,0.2)}
+.active{background:white;color:black}
 
 /* 🪟 MAIN */
 .main{
-  margin-left:200px;
+  margin-left:220px;
   padding:30px;
   height:100vh;
-  overflow-y:auto;
+  overflow:auto;
 }
 
-/* ✨ CARDS */
+/* ✨ CARD */
 .card{
   background:rgba(255,255,255,0.1);
   backdrop-filter:blur(20px);
-  padding:25px;
+  padding:20px;
   border-radius:20px;
   margin-bottom:20px;
-  transition:0.3s;
 }
 
-.card:hover{
-  transform:translateY(-3px);
-}
-
-/* 🏠 HOME */
+/* 🏠 */
 .title{
   font-family:'Playfair Display';
   font-size:36px;
 }
 
-.quote{
-  margin-top:10px;
-  opacity:0.8;
-  font-style:italic;
-}
-
-/* 📋 TASK */
-.task{
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  border-bottom:1px solid rgba(255,255,255,0.2);
-}
-
-.task input{
-  margin-right:10px;
-}
-
-.completed{
-  text-decoration:line-through;
-  opacity:0.5;
-}
-
-/* ➕ BUTTON */
+/* ➕ */
 .addBtn{
   position:fixed;
   bottom:25px;
@@ -129,38 +95,18 @@ body{
   height:65px;
   border-radius:50%;
   border:none;
-  font-size:30px;
-  background:var(--accent);
-  color:black;
+  font-size:28px;
   cursor:pointer;
-  transition:0.3s;
 }
 
-.addBtn:hover{
-  transform:scale(1.1);
-}
-
-/* POPUP */
-.popup{
-  position:fixed;
-  bottom:100px;
-  right:25px;
-  background:white;
-  color:black;
-  padding:15px;
-  border-radius:15px;
+/* 📋 TASK */
+.task{
   display:flex;
-  flex-direction:column;
-  gap:10px;
-  animation:fade 0.3s;
+  justify-content:space-between;
+  padding:8px;
 }
 
-@keyframes fade{
-  from{opacity:0; transform:translateY(10px)}
-  to{opacity:1}
-}
-
-/* 🍅 POMODORO */
+/* 🍅 */
 .center{
   display:flex;
   justify-content:center;
@@ -174,19 +120,58 @@ body{
   font-family:'Playfair Display';
 }
 
-/* ⚙ SETTINGS */
-.settings input{
-  width:100%;
+/* 📓 NOTEBOOK GRID */
+#notebookGrid{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
 }
 
-/* 📓 NOTES */
-.note{
+.notebook{
+  width:120px;
+  height:180px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,0.2);
+  cursor:pointer;
+}
+
+/* FULL NOTEBOOK */
+#notebookView{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
   background:white;
   color:black;
-  padding:15px;
-  border-radius:10px;
-  margin-top:10px;
+  display:none;
+  flex-direction:column;
 }
+
+.notebookHeader{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#eee;
+}
+
+canvas{
+  flex:1;
+  background:#fffef8;
+}
+
+.tools{
+  display:flex;
+  gap:10px;
+  padding:10px;
+  background:#eee;
+}
+
+/* SETTINGS */
+.settings input{width:100%}
 
 </style>
 </head>
@@ -195,42 +180,31 @@ body{
 
 <div id="bg"></div>
 
-<!-- 🌸 SIDEBAR -->
 <div class="sidebar">
   <div class="logo">Planner</div>
-
   <div class="tab active" onclick="switchTab('home',this)">Home</div>
   <div class="tab" onclick="switchTab('tasks',this)">Tasks</div>
   <div class="tab" onclick="switchTab('pomodoro',this)">Pomodoro</div>
-  <div class="tab" onclick="switchTab('notes',this)">Notes</div>
+  <div class="tab" onclick="switchTab('notes',this)">Notebooks</div>
   <div class="tab" onclick="switchTab('settings',this)">Settings</div>
 </div>
 
-<!-- 🪟 MAIN -->
 <div class="main">
 
-<!-- HOME -->
 <div id="home">
   <div class="card">
     <div class="title" id="date"></div>
-    <div class="quote">“Small progress is still progress.” 🌷</div>
-  </div>
-
-  <div class="card">
-    <h3>Today’s Tasks</h3>
-    <div id="preview"></div>
+    <div>“You’re doing amazing.” 🌸</div>
   </div>
 </div>
 
-<!-- TASKS -->
 <div id="tasks" style="display:none">
   <div class="card">
-    <h2>To Do</h2>
+    <h2>Tasks</h2>
     <div id="taskList"></div>
   </div>
 </div>
 
-<!-- POMODORO -->
 <div id="pomodoro" style="display:none">
   <div class="center">
     <div class="timer" id="timer">25:00</div>
@@ -239,79 +213,68 @@ body{
   </div>
 </div>
 
-<!-- NOTES -->
 <div id="notes" style="display:none">
   <div class="card">
-    <h2>Notebook</h2>
-    <button onclick="addNote()">Add Page</button>
-    <div id="notesList"></div>
+    <button onclick="addNotebook()">+ Notebook</button>
+    <div id="notebookGrid"></div>
   </div>
 </div>
 
-<!-- SETTINGS -->
 <div id="settings" style="display:none">
   <div class="card settings">
     <h2>Settings</h2>
-
-    <label>Accent Color</label>
-    <input type="color" onchange="setColor(this.value)">
-
-    <label>Upload Background</label>
-    <input type="file" accept="image/*" onchange="uploadBg(event)">
-
-    <button onclick="setBg(0)">Cafe</button>
-    <button onclick="setBg(1)">Beach</button>
-    <button onclick="setBg(2)">City</button>
+    <input type="color" onchange="setAccent(this.value)">
+    <input type="file" onchange="uploadBg(event)">
   </div>
 </div>
 
 </div>
 
-<button class="addBtn" onclick="openMenu()">+</button>
-<div id="menu"></div>
+<button class="addBtn" id="plus" onclick="addTask()">+</button>
+
+<!-- NOTEBOOK -->
+<div id="notebookView">
+  <div class="notebookHeader">
+    <button onclick="closeNotebook()">Back</button>
+    <span id="nbTitle"></span>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <div class="tools">
+    <input type="color" id="colorPicker">
+    <button onclick="tool='pen'">Pen</button>
+    <button onclick="tool='highlight'">Highlight</button>
+    <button onclick="addText()">Text</button>
+    <input type="file" onchange="addImage(event)">
+  </div>
+</div>
 
 <script>
 
-/* 🌄 BACKGROUNDS */
-let bgs=[
-"https://images.unsplash.com/photo-1492724441997-5dc865305da7",
-"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-"https://images.unsplash.com/photo-1512453979798-5ea266f8880c"
-];
-
-function setBg(i){
-  bg.style.backgroundImage=`url(${bgs[i]})`;
-  localStorage.setItem("bg",i);
-}
-
-let saved=localStorage.getItem("bg")||0;
-setBg(saved);
+/* BACKGROUND */
+let bg=document.getElementById("bg");
+let saved=localStorage.getItem("bg");
+if(saved) bg.style.backgroundImage=`url(${saved})`;
 
 function uploadBg(e){
- let file=e.target.files[0];
- let reader=new FileReader();
- reader.onload=(x)=>{
-   bg.style.backgroundImage=`url(${x.target.result})`;
-   localStorage.setItem("customBg",x.target.result);
- }
- reader.readAsDataURL(file);
+ let r=new FileReader();
+ r.onload=x=>{
+  bg.style.backgroundImage=`url(${x.target.result})`;
+  localStorage.setItem("bg",x.target.result);
+ };
+ r.readAsDataURL(e.target.files[0]);
 }
 
-let custom=localStorage.getItem("customBg");
-if(custom){bg.style.backgroundImage=`url(${custom})`}
-
-/* 🎨 COLOR */
-function setColor(c){
- document.documentElement.style.setProperty("--accent",c);
- localStorage.setItem("color",c);
+/* ACCENT */
+function setAccent(c){
+ document.querySelector(".sidebar").style.background=c;
 }
-let savedColor=localStorage.getItem("color");
-if(savedColor) setColor(savedColor);
 
-/* 📅 DATE */
+/* DATE */
 date.innerText=new Date().toDateString();
 
-/* 🧭 NAV */
+/* NAV */
 function switchTab(id,el){
  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
  el.classList.add("active");
@@ -320,114 +283,101 @@ function switchTab(id,el){
  document.getElementById(id).style.display="block";
 }
 
-/* 📋 TASKS */
+/* TASKS */
 let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
 
-function save(){
- localStorage.setItem("tasks",JSON.stringify(tasks));
-}
-
-function render(){
- taskList.innerHTML="";
- preview.innerHTML="";
-
- tasks.forEach((t,i)=>{
-  let div=document.createElement("div");
-  div.className="task"+(t.done?" completed":"");
-
-  div.innerHTML=`
-  <div>
-    <input type="checkbox" ${t.done?"checked":""} onclick="toggle(${i})">
-    ${t.text} <small>${t.date||""}</small>
-  </div>
-  <button onclick="del(${i})">x</button>`;
-
-  taskList.appendChild(div);
-
-  if(!t.done){
-    preview.innerHTML+=`<div>${t.text}</div>`;
-  }
- });
-}
-render();
-
 function addTask(){
- tasks.push({
-  text:text.value,
-  date:due.value,
-  done:false
+ let text=prompt("Task?");
+ let date=prompt("Due date?");
+ if(!text)return;
+
+ tasks.push({text,date});
+ localStorage.setItem("tasks",JSON.stringify(tasks));
+ renderTasks();
+}
+
+function renderTasks(){
+ taskList.innerHTML="";
+ tasks.forEach(t=>{
+  taskList.innerHTML+=`<div class="task">${t.text} ${t.date||""}</div>`;
  });
- save(); render();
- menu.innerHTML="";
 }
+renderTasks();
 
-function toggle(i){
- tasks[i].done=!tasks[i].done;
- save(); render();
-}
-
-function del(i){
- tasks.splice(i,1);
- save(); render();
-}
-
-/* ➕ MENU */
-function openMenu(){
- menu.innerHTML=`
- <div class="popup">
-   <input id="text" placeholder="Task">
-   <input type="date" id="due">
-   <button onclick="addTask()">Add</button>
- </div>`;
-}
-
-/* 🍅 TIMER */
-let time=1500, int;
-
+/* 🍅 */
+let t=1500,int;
 function start(){
- if(int) return;
+ if(int)return;
  int=setInterval(()=>{
-  time--;
-  update();
+  t--;
+  timer.innerText=Math.floor(t/60)+":"+("0"+t%60).slice(-2);
  },1000);
 }
+function reset(){clearInterval(int);t=1500;}
 
-function reset(){
- clearInterval(int);
- time=1500;
- update();
+/* 📓 NOTEBOOK */
+let notebooks=JSON.parse(localStorage.getItem("nb"))||[];
+
+function addNotebook(){
+ let name=prompt("Name?");
+ notebooks.push({name});
+ localStorage.setItem("nb",JSON.stringify(notebooks));
+ renderNB();
 }
 
-function update(){
- let m=Math.floor(time/60);
- let s=time%60;
- timer.innerText=`${m}:${s<10?"0":""}${s}`;
-}
-
-/* 📓 NOTES */
-let notes=JSON.parse(localStorage.getItem("notes"))||[];
-
-function addNote(){
- notes.push("");
- saveNotes(); renderNotes();
-}
-
-function renderNotes(){
- notesList.innerHTML="";
- notes.forEach((n,i)=>{
-  notesList.innerHTML+=`
-  <textarea class="note" oninput="editNote(${i},this.value)">${n}</textarea>`;
+function renderNB(){
+ notebookGrid.innerHTML="";
+ notebooks.forEach((n,i)=>{
+  notebookGrid.innerHTML+=`
+  <div class="notebook" onclick="openNB(${i})">${n.name}</div>`;
  });
 }
-renderNotes();
+renderNB();
 
-function editNote(i,val){
- notes[i]=val;
- saveNotes();
+function openNB(i){
+ notebookView.style.display="flex";
+ nbTitle.innerText=notebooks[i].name;
+ initCanvas();
 }
 
-function saveNotes(){
- localStorage.setItem("notes",JSON.stringify(notes));
+function closeNotebook(){
+ notebookView.style.display="none";
+}
+
+/* CANVAS */
+let canvas=document.getElementById("canvas");
+let ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let drawing=false, tool="pen";
+
+canvas.onmousedown=()=>drawing=true;
+canvas.onmouseup=()=>drawing=false;
+
+canvas.onmousemove=e=>{
+ if(!drawing)return;
+ ctx.strokeStyle=colorPicker.value;
+ ctx.lineWidth=tool==="pen"?2:10;
+ ctx.lineTo(e.clientX,e.clientY);
+ ctx.stroke();
+};
+
+/* TEXT */
+function addText(){
+ let t=prompt("Text?");
+ ctx.fillText(t,100,100);
+}
+
+/* IMAGE */
+function addImage(e){
+ let r=new FileReader();
+ r.onload=x=>{
+  let img=new Image();
+  img.onload=()=>ctx.drawImage(img,100,100,150,150);
+  img.src=x.target.result;
+ };
+ r.readAsDataURL(e.target.files[0]);
 }
 
 </script>
