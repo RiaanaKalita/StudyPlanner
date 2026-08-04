@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Planner</title>
@@ -7,25 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
+
 :root{
   --accent:#ff8fab;
 }
 
-/* RESET */
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:'Inter',sans-serif;
-}
-
-/* BACKGROUND SYSTEM */
+/* BASE */
 body{
-  height:100vh;
-  overflow:hidden;
+  margin:0;
+  font-family:'Inter',sans-serif;
   color:#1a1a1a;
+  overflow:hidden;
 }
 
+/* BACKGROUND */
 body::before{
   content:"";
   position:fixed;
@@ -39,7 +34,7 @@ body::after{
   content:"";
   position:fixed;
   inset:0;
-  background:rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.45);
   backdrop-filter:blur(10px);
   z-index:-1;
 }
@@ -49,62 +44,42 @@ body::after{
   position:fixed;
   width:200px;
   height:100%;
-  background:rgba(255,255,255,0.35);
-  backdrop-filter:blur(14px);
+  background:rgba(255,255,255,0.3);
+  backdrop-filter:blur(12px);
   padding:20px;
 }
 
 .sidebar div{
   margin:15px 0;
   cursor:pointer;
-  font-weight:500;
 }
 
 /* MAIN */
 .main{
   margin-left:220px;
   padding:30px;
-  height:100%;
+  height:100vh;
   overflow:auto;
 }
 
-/* HOME */
-.home h1{
-  font-size:32px;
-  margin-bottom:10px;
-}
-
-.quote{
-  margin:20px 0;
-  padding:20px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.5);
-}
-
 /* TASKS */
-.section{
-  margin-top:20px;
-}
-
 .section-header{
+  display:flex;
+  justify-content:space-between;
+  margin-top:20px;
   font-weight:600;
-  cursor:pointer;
 }
 
 .task{
   display:flex;
   justify-content:space-between;
-  padding:10px;
   margin-top:5px;
-  background:rgba(255,255,255,0.5);
+  padding:10px;
   border-radius:10px;
+  background:rgba(255,255,255,0.5);
 }
 
-.task small{
-  opacity:0.6;
-}
-
-/* PLUS BUTTON */
+/* PLUS */
 .plus{
   position:fixed;
   bottom:30px;
@@ -115,50 +90,27 @@ body::after{
   border:none;
   background:var(--accent);
   color:white;
-  font-size:30px;
-  cursor:pointer;
+  font-size:28px;
 }
 
-/* DROPDOWN */
-.dropdown{
+/* MENU */
+.menu{
   position:fixed;
   bottom:100px;
   right:30px;
   background:white;
-  border-radius:10px;
-  overflow:hidden;
+  border-radius:12px;
   display:none;
+  overflow:hidden;
 }
 
-.dropdown div{
-  padding:10px 20px;
+.menu div{
+  padding:12px 20px;
   cursor:pointer;
 }
 
-.dropdown div:hover{
+.menu div:hover{
   background:#eee;
-}
-
-/* POMODORO */
-.pomodoro{
-  display:none;
-  text-align:center;
-  margin-top:100px;
-}
-
-.timer{
-  font-size:80px;
-  margin:20px;
-}
-
-/* SETTINGS */
-.settings{
-  display:none;
-}
-
-select{
-  padding:8px;
-  margin-top:10px;
 }
 
 </style>
@@ -168,8 +120,7 @@ select{
 
 <div class="sidebar">
   <div onclick="show('home')">Home</div>
-  <div onclick="show('tasks')">Tasks</div>
-  <div onclick="show('pomodoro')">Pomodoro</div>
+  <div onclick="show('notes')">Notes</div>
   <div onclick="show('settings')">Settings</div>
 </div>
 
@@ -177,59 +128,47 @@ select{
 
   <div id="home">
     <h1>Planner 🌸</h1>
-    <div class="quote">“romanticize your life”</div>
-    <div id="calendar"></div>
+    <p>romanticize your life ✨</p>
   </div>
 
-  <div id="tasks" style="display:none;"></div>
+  <div id="notes" style="display:none;"></div>
 
-  <div id="pomodoro" class="pomodoro">
-    <div class="timer" id="timer">25:00</div>
-    <button onclick="start()">Start</button>
-    <button onclick="reset()">Reset</button>
-  </div>
-
-  <div id="settings" class="settings">
+  <div id="settings" style="display:none;">
     <h2>Settings</h2>
 
-    <label>Background</label><br>
-    <select onchange="setBg(this.value)">
-      <option value="tokyo">Tokyo</option>
-      <option value="cafe">Cafe</option>
-      <option value="garden">Garden</option>
-    </select>
+    <h4>Choose preset background</h4>
+    <button onclick="setBg('tokyo')">Tokyo</button>
+    <button onclick="setBg('cafe')">Cafe</button>
+    <button onclick="setBg('garden')">Garden</button>
 
-    <br><br>
-
-    <label>Accent</label><br>
-    <input type="color" onchange="setAccent(this.value)">
+    <h4>Upload background</h4>
+    <input type="file" onchange="uploadBg(event)">
   </div>
 
 </div>
 
 <button class="plus" onclick="toggleMenu()">+</button>
 
-<div class="dropdown" id="menu">
-  <div onclick="addTask()">Task</div>
-  <div onclick="addSection()">Section</div>
+<div class="menu" id="menu">
+  <div onclick="createTask()">Task</div>
+  <div onclick="createSection()">Section</div>
 </div>
 
 <script>
 
-/* STATE */
-let data = JSON.parse(localStorage.getItem("planner")) || {
-  tasks:[],
-  sections:[]
-};
+/* DATA */
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let sections = JSON.parse(localStorage.getItem("sections")) || [];
 
 /* SAVE */
 function save(){
-  localStorage.setItem("planner", JSON.stringify(data));
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  localStorage.setItem("sections", JSON.stringify(sections));
 }
 
 /* NAV */
 function show(page){
-  ["home","tasks","pomodoro","settings"].forEach(id=>{
+  ["home","notes","settings"].forEach(id=>{
     document.getElementById(id).style.display="none";
   });
   document.getElementById(page).style.display="block";
@@ -239,53 +178,111 @@ function show(page){
 /* MENU */
 function toggleMenu(){
   let m=document.getElementById("menu");
-  m.style.display = m.style.display=="block"?"none":"block";
+  m.style.display = m.style.display==="block"?"none":"block";
 }
 
 /* ADD */
-function addTask(){
-  let t=prompt("Task name");
-  let d=prompt("Due date (YYYY-MM-DD)");
+function createSection(){
+  let name = prompt("Section name");
+  if(!name) return;
 
-  data.tasks.push({text:t,date:d,done:false});
+  sections.push({id:Date.now(),name,open:true});
   save();
   render();
 }
 
-function addSection(){
-  let s=prompt("Section name");
-  data.sections.push({name:s,open:true});
+function createTask(sectionId=null){
+  let text = prompt("Task");
+  if(!text) return;
+
+  let date = prompt("Due date YYYY-MM-DD");
+
+  tasks.push({
+    id:Date.now(),
+    text,
+    date,
+    sectionId,
+    done:false
+  });
+
   save();
   render();
 }
 
-/* RENDER TASKS */
+/* TOGGLE */
+function toggleSection(id){
+  let s=sections.find(x=>x.id===id);
+  s.open=!s.open;
+  save();
+  render();
+}
+
+function toggleTask(id){
+  let t=tasks.find(x=>x.id===id);
+  t.done=!t.done;
+  save();
+  render();
+}
+
+/* DELETE */
+function deleteTask(id){
+  tasks = tasks.filter(t=>t.id!==id);
+  save();
+  render();
+}
+
+/* RENDER */
 function render(){
-  let el=document.getElementById("tasks");
+  let el=document.getElementById("notes");
   el.innerHTML="";
 
-  data.sections.forEach((s,i)=>{
-    let sec=document.createElement("div");
-    sec.className="section";
+  sections.forEach(sec=>{
+    let box=document.createElement("div");
 
-    let head=document.createElement("div");
-    head.className="section-header";
-    head.innerText=s.name;
-    head.onclick=()=>{s.open=!s.open;save();render();};
+    box.innerHTML = `
+      <div class="section-header">
+        <span onclick="toggleSection(${sec.id})">
+          ${sec.open ? "▼" : "▶"} ${sec.name}
+        </span>
+        <button onclick="createTask(${sec.id})">+</button>
+      </div>
+    `;
 
-    sec.appendChild(head);
-
-    if(s.open){
-      data.tasks.forEach((t)=>{
-        let div=document.createElement("div");
-        div.className="task";
-        div.innerHTML=`${t.text} <small>${t.date||""}</small>`;
-        sec.appendChild(div);
+    if(sec.open){
+      tasks.filter(t=>t.sectionId===sec.id && !t.done).forEach(t=>{
+        box.innerHTML += taskHTML(t);
       });
     }
 
-    el.appendChild(sec);
+    el.appendChild(box);
   });
+
+  /* NO SECTION */
+  tasks.filter(t=>!t.sectionId && !t.done).forEach(t=>{
+    el.innerHTML += taskHTML(t);
+  });
+
+  /* COMPLETED */
+  let done = tasks.filter(t=>t.done);
+  if(done.length){
+    el.innerHTML += "<h3>Completed</h3>";
+    done.forEach(t=>{
+      el.innerHTML += taskHTML(t);
+    });
+  }
+}
+
+/* TASK HTML */
+function taskHTML(t){
+  return `
+    <div class="task">
+      <span onclick="toggleTask(${t.id})">
+        ${t.done ? "✔" : "○"} ${t.text}
+      </span>
+      <small>${t.date || ""}</small>
+      <button onclick="deleteTask(${t.id})">x</button>
+    </div>
+  `;
 }
 
 /* BACKGROUNDS */
@@ -296,32 +293,27 @@ function setBg(type){
     garden:"https://images.unsplash.com/photo-1466692476868-aef1dfb1e735"
   }[type];
 
-  document.body.style.setProperty('--bg',url);
   document.body.style.backgroundImage=`url(${url})`;
+  localStorage.setItem("bg", url);
 }
 
-/* ACCENT */
-function setAccent(c){
-  document.documentElement.style.setProperty("--accent",c);
+/* UPLOAD BG */
+function uploadBg(e){
+  let file=e.target.files[0];
+  let reader=new FileReader();
+
+  reader.onload=function(x){
+    document.body.style.backgroundImage=`url(${x.target.result})`;
+    localStorage.setItem("bg", x.target.result);
+  };
+
+  reader.readAsDataURL(file);
 }
 
-/* POMODORO */
-let time=1500;
-let int;
-
-function start(){
-  int=setInterval(()=>{
-    time--;
-    let m=Math.floor(time/60);
-    let s=time%60;
-    document.getElementById("timer").innerText=
-      `${m}:${s<10?"0":""}${s}`;
-  },1000);
-}
-
-function reset(){
-  clearInterval(int);
-  time=1500;
+/* LOAD BG */
+let savedBg = localStorage.getItem("bg");
+if(savedBg){
+  document.body.style.backgroundImage=`url(${savedBg})`;
 }
 
 /* INIT */
