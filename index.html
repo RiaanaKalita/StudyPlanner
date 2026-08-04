@@ -6,7 +6,7 @@
 
 <style>
 :root{
-  --accent: rgba(255,255,255,0.2);
+  --accent: rgba(255,255,255,0.15);
 }
 
 body{
@@ -22,13 +22,17 @@ body{
 /* SIDEBAR */
 .sidebar{
   width:220px;
-  backdrop-filter:blur(20px);
+  backdrop-filter:blur(25px);
   background:var(--accent);
   padding:20px;
 }
 .sidebar div{
   margin:15px 0;
   cursor:pointer;
+  transition:0.2s;
+}
+.sidebar div:hover{
+  transform:translateX(5px);
 }
 
 /* MAIN */
@@ -38,41 +42,48 @@ body{
   overflow:auto;
 }
 
-/* HOME */
+/* QUOTE */
 .quote{
-  backdrop-filter:blur(20px);
-  padding:20px;
-  border-radius:20px;
-  margin-bottom:20px;
-  font-size:18px;
+  backdrop-filter:blur(25px);
+  padding:30px;
+  border-radius:25px;
+  font-size:28px;
+  text-align:center;
+  font-family:"Playfair Display", serif;
+  background:rgba(255,255,255,0.08);
+  animation:fade 1s ease;
+}
+@keyframes fade{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1;}
 }
 
+/* DATE */
 .date{
-  font-size:28px;
-  margin-bottom:10px;
+  margin:20px 0;
 }
 
 /* CALENDAR */
 .calendar{
-  backdrop-filter:blur(20px);
-  padding:15px;
-  border-radius:20px;
+  backdrop-filter:blur(25px);
+  padding:20px;
+  border-radius:25px;
 }
-
 .grid{
   display:grid;
   grid-template-columns:repeat(7,1fr);
   gap:5px;
 }
-
 .day{
-  padding:10px;
+  padding:12px;
+  border-radius:12px;
   text-align:center;
-  border-radius:10px;
   cursor:pointer;
+  transition:0.2s;
 }
 .day:hover{
-  background:rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.25);
+  transform:scale(1.05);
 }
 
 /* TASK LIST */
@@ -93,16 +104,14 @@ body{
   cursor:pointer;
   background:white;
   color:black;
+  display:none;
 }
 
-/* POMODORO */
+/* TIMER */
 .timer{
   font-size:80px;
   text-align:center;
   margin-top:100px;
-  transition:0.3s;
-}
-.glow{
   text-shadow:0 0 20px rgba(255,255,255,0.8);
 }
 
@@ -112,23 +121,28 @@ body{
   height:200px;
   border-radius:15px;
   margin:10px;
-  display:inline-block;
   padding:10px;
+  display:inline-block;
   cursor:pointer;
+  transition:0.3s;
+}
+.notebook:hover{
+  transform:translateY(-5px) scale(1.05);
 }
 
 /* EDITOR */
 .editor{
-  height:80vh;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
   background:white;
   color:black;
-  padding:20px;
+  padding:30px;
+  z-index:10;
 }
 
-/* SETTINGS */
-select,input{
-  margin:10px 0;
-}
 </style>
 </head>
 
@@ -160,12 +174,11 @@ select,input{
 <!-- TASKS -->
 <div id="tasks" style="display:none">
   <h2>Tasks</h2>
-  <div id="taskSections"></div>
 </div>
 
 <!-- POMODORO -->
 <div id="pomodoro" style="display:none">
-  <div class="timer glow" id="timer">25:00</div>
+  <div class="timer" id="timer">25:00</div>
   <button onclick="startTimer()">Start</button>
 
   <h3>Settings</h3>
@@ -186,23 +199,19 @@ select,input{
 <div id="settings" style="display:none">
   <h2>Settings</h2>
 
-  <p>Background Preset</p>
-  <select onchange="setBgPreset(this.value)">
+  <select onchange="setBg(this.value)">
     <option value="">Default</option>
     <option value="https://images.unsplash.com/photo-1507525428034-b723cf961d3e">Ocean</option>
     <option value="https://images.unsplash.com/photo-1492724441997-5dc865305da7">Sky</option>
   </select>
 
-  <p>Upload Background</p>
   <input type="file" onchange="uploadBg(event)">
-
-  <p>Accent</p>
   <input type="color" onchange="setAccent(this.value)">
 </div>
 
 </div>
 
-<button class="addBtn" id="addBtn" onclick="addTask()">+</button>
+<button class="addBtn" id="addBtn" onclick="handleAdd()">+</button>
 
 <script>
 
@@ -211,35 +220,58 @@ function show(id){
   document.querySelectorAll(".main > div").forEach(d=>d.style.display="none");
   document.getElementById(id).style.display="block";
 
-  document.getElementById("addBtn").style.display = id==="tasks" ? "block" : "none";
+  document.getElementById("addBtn").style.display = id==="tasks"||id==="notes" ? "block":"none";
 }
 
-/* QUOTE */
+/* QUOTES */
 const quotes=[
 "you’re doing better than you think 🌸",
-"small steps still matter ✨",
-"rest is productive too 💗"
+"slow progress is still progress ✨",
+"be gentle with yourself 💗",
+"dream big, start small ☁️",
+"you deserve beautiful things 🌷",
+"everything is unfolding perfectly 🌙"
 ];
-document.getElementById("quote").innerText=
-quotes[Math.floor(Math.random()*quotes.length)];
+
+document.getElementById("quote").innerHTML=
+`<div style="opacity:0.6;font-size:14px;">daily reminder</div>
+${quotes[Math.floor(Math.random()*quotes.length)]}`;
 
 /* DATE */
 let today=new Date();
-document.getElementById("date").innerText=
-today.toDateString();
+document.getElementById("date").innerHTML=
+`${today.toLocaleDateString(undefined,{weekday:'long'})}<br>
+<span style="font-size:32px;">${today.getDate()} ${today.toLocaleDateString(undefined,{month:'long'})}</span>`;
 
 /* CALENDAR */
 function renderCalendar(){
   let grid=document.getElementById("calendarGrid");
   grid.innerHTML="";
-  let days=30;
 
-  for(let i=1;i<=days;i++){
+  const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  days.forEach(d=>{
+    let el=document.createElement("div");
+    el.innerText=d;
+    el.style.opacity="0.6";
+    grid.appendChild(el);
+  });
+
+  let year=today.getFullYear();
+  let month=today.getMonth();
+
+  let first=new Date(year,month,1).getDay();
+  let total=new Date(year,month+1,0).getDate();
+
+  document.getElementById("month").innerText=
+    today.toLocaleString('default',{month:'long'})+" "+year;
+
+  for(let i=0;i<first;i++) grid.appendChild(document.createElement("div"));
+
+  for(let i=1;i<=total;i++){
     let d=document.createElement("div");
     d.className="day";
     d.innerText=i;
-
-    d.onclick=()=>showTasksForDay(i);
+    d.onclick=()=>showTasks(i);
     grid.appendChild(d);
   }
 }
@@ -250,40 +282,104 @@ let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
 
 function addTask(){
   let text=prompt("Task?");
-  let date=prompt("Day (1-30)");
+  let date=prompt("Day number?");
   tasks.push({text,date});
   save();
 }
 
-function showTasksForDay(day){
+function showTasks(day){
   let list=document.getElementById("dayTasks");
   list.innerHTML="<h3>Tasks</h3>";
 
   tasks.filter(t=>t.date==day).forEach(t=>{
-    let div=document.createElement("div");
-    div.innerText=t.text;
-    list.appendChild(div);
+    let d=document.createElement("div");
+    d.innerText=t.text;
+    list.appendChild(d);
   });
 }
 
-/* SAVE */
 function save(){
   localStorage.setItem("tasks",JSON.stringify(tasks));
 }
 
 /* TIMER */
-let time=1500;
+let t=1500;
 function startTimer(){
   setInterval(()=>{
-    time--;
-    let m=Math.floor(time/60);
-    let s=time%60;
+    t--;
+    let m=Math.floor(t/60);
+    let s=t%60;
     document.getElementById("timer").innerText=
     `${m}:${s<10?"0":""}${s}`;
   },1000);
 }
 
-/* BACKGROUNDS */
+/* NOTES */
+let notebooks=JSON.parse(localStorage.getItem("notebooks"))||[];
+
+function handleAdd(){
+  let page=document.querySelector(".main > div:not([style*='none'])").id;
+  if(page==="tasks") addTask();
+  if(page==="notes") createNotebook();
+}
+
+function createNotebook(){
+  let name=prompt("Notebook name?");
+  if(!name) return;
+
+  notebooks.push({id:Date.now(),name,color:randColor(),content:""});
+  saveAll();
+  renderNotebooks();
+}
+
+function renderNotebooks(){
+  let c=document.getElementById("notebooks");
+  c.innerHTML="";
+
+  notebooks.forEach(nb=>{
+    let d=document.createElement("div");
+    d.className="notebook";
+    d.style.background=nb.color;
+    d.innerHTML=`${nb.name}`;
+    d.onclick=()=>openNotebook(nb.id);
+    c.appendChild(d);
+  });
+}
+
+function openNotebook(id){
+  let nb=notebooks.find(n=>n.id===id);
+
+  let ed=document.createElement("div");
+  ed.className="editor";
+
+  ed.innerHTML=`
+  <h2>${nb.name}</h2>
+  <div contenteditable="true" id="editArea" style="height:70%;border:1px solid #ccc;">
+  ${nb.content}
+  </div>
+  <br>
+  <button onclick="saveNotebook(${id})">Save</button>
+  <button onclick="this.parentElement.remove()">Close</button>
+  `;
+
+  document.body.appendChild(ed);
+}
+
+function saveNotebook(id){
+  let nb=notebooks.find(n=>n.id===id);
+  nb.content=document.getElementById("editArea").innerHTML;
+  saveAll();
+}
+
+function randColor(){
+  return ["#ffd6e0","#d6f0ff","#fff0d6","#e6d6ff"][Math.floor(Math.random()*4)];
+}
+
+function saveAll(){
+  localStorage.setItem("notebooks",JSON.stringify(notebooks));
+}
+
+/* SETTINGS */
 function uploadBg(e){
   let r=new FileReader();
   r.onload=()=>{
@@ -293,7 +389,7 @@ function uploadBg(e){
   r.readAsDataURL(e.target.files[0]);
 }
 
-function setBgPreset(url){
+function setBg(url){
   document.body.style.backgroundImage=`url(${url})`;
   localStorage.setItem("bg",url);
 }
@@ -306,14 +402,13 @@ function uploadPomodoroBg(e){
   r.readAsDataURL(e.target.files[0]);
 }
 
-/* ACCENT */
 function setAccent(c){
-  document.documentElement.style.setProperty("--accent",hexToRGBA(c,0.25));
+  document.documentElement.style.setProperty("--accent",hex(c,0.2));
 }
-function hexToRGBA(hex,a){
-  let r=parseInt(hex.slice(1,3),16);
-  let g=parseInt(hex.slice(3,5),16);
-  let b=parseInt(hex.slice(5,7),16);
+function hex(h,a){
+  let r=parseInt(h.slice(1,3),16);
+  let g=parseInt(h.slice(3,5),16);
+  let b=parseInt(h.slice(5,7),16);
   return `rgba(${r},${g},${b},${a})`;
 }
 
@@ -321,6 +416,7 @@ function hexToRGBA(hex,a){
 window.onload=()=>{
   let bg=localStorage.getItem("bg");
   if(bg) document.body.style.backgroundImage=`url(${bg})`;
+  renderNotebooks();
 };
 
 </script>
