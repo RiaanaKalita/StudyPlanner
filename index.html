@@ -1,51 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Planner</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
 <style>
-
 :root{
-  --accent:#ff8fab;
+  --accent: rgba(255,255,255,0.2);
 }
 
-/* BASE */
-body{
+*{
+  box-sizing:border-box;
   margin:0;
-  font-family:'Inter',sans-serif;
-  color:#1a1a1a;
-  overflow:hidden;
+  font-family: "SF Pro Display", sans-serif;
 }
 
-/* BACKGROUND */
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
+body{
+  height:100vh;
+  display:flex;
   background-size:cover;
   background-position:center;
-  z-index:-2;
-}
-
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:rgba(255,255,255,0.45);
-  backdrop-filter:blur(10px);
-  z-index:-1;
+  color:white;
+  overflow:hidden;
 }
 
 /* SIDEBAR */
 .sidebar{
-  position:fixed;
   width:200px;
-  height:100%;
-  background:rgba(255,255,255,0.3);
-  backdrop-filter:blur(12px);
+  backdrop-filter: blur(20px);
+  background: var(--accent);
   padding:20px;
 }
 
@@ -56,31 +39,28 @@ body::after{
 
 /* MAIN */
 .main{
-  margin-left:220px;
+  flex:1;
   padding:30px;
-  height:100vh;
   overflow:auto;
 }
 
-/* TASKS */
-.section-header{
+/* CENTER POMODORO */
+.center{
   display:flex;
-  justify-content:space-between;
-  margin-top:20px;
-  font-weight:600;
+  justify-content:center;
+  align-items:center;
+  height:100%;
+  flex-direction:column;
 }
 
-.task{
-  display:flex;
-  justify-content:space-between;
-  margin-top:5px;
-  padding:10px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.5);
+.timer{
+  font-size:80px;
+  font-weight:200;
+  transition:0.3s;
 }
 
-/* PLUS */
-.plus{
+/* ADD BUTTON */
+.addBtn{
   position:fixed;
   bottom:30px;
   right:30px;
@@ -88,31 +68,56 @@ body::after{
   height:60px;
   border-radius:50%;
   border:none;
-  background:var(--accent);
-  color:white;
-  font-size:28px;
+  font-size:30px;
+  cursor:pointer;
+  background:white;
+  color:black;
 }
 
-/* MENU */
-.menu{
+/* POPUP */
+#popup{
   position:fixed;
   bottom:100px;
   right:30px;
   background:white;
+  color:black;
   border-radius:12px;
   display:none;
   overflow:hidden;
 }
 
-.menu div{
+#popup div{
   padding:12px 20px;
   cursor:pointer;
 }
-
-.menu div:hover{
+#popup div:hover{
   background:#eee;
 }
 
+/* NOTES */
+.section{
+  margin-top:15px;
+  backdrop-filter: blur(15px);
+  padding:10px;
+  border-radius:10px;
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
+}
+
+.taskItem{
+  display:flex;
+  justify-content:space-between;
+  margin:5px 0;
+}
+
+/* SETTINGS */
+.settings input{
+  margin:10px 0;
+}
 </style>
 </head>
 
@@ -120,79 +125,108 @@ body::after{
 
 <div class="sidebar">
   <div onclick="show('home')">Home</div>
-  <div onclick="show('notes')">Notes</div>
+  <div onclick="show('notes')">Planner</div>
   <div onclick="show('settings')">Settings</div>
 </div>
 
 <div class="main">
 
-  <div id="home">
-    <h1>Planner 🌸</h1>
-    <p>romanticize your life ✨</p>
+  <!-- HOME -->
+  <div id="home" class="center">
+    <div class="timer" id="timer">25:00</div>
+    <button onclick="startTimer()">Start</button>
   </div>
 
-  <div id="notes" style="display:none;"></div>
+  <!-- NOTES -->
+  <div id="notes" style="display:none">
+    <h2>Planner</h2>
+    <div id="sections"></div>
+  </div>
 
-  <div id="settings" style="display:none;">
+  <!-- SETTINGS -->
+  <div id="settings" style="display:none" class="settings">
     <h2>Settings</h2>
 
-    <h4>Choose preset background</h4>
-    <button onclick="setBg('tokyo')">Tokyo</button>
-    <button onclick="setBg('cafe')">Cafe</button>
-    <button onclick="setBg('garden')">Garden</button>
-
-    <h4>Upload background</h4>
+    <p>Background</p>
     <input type="file" onchange="uploadBg(event)">
+
+    <p>Accent</p>
+    <input type="color" onchange="setAccent(this.value)">
   </div>
 
 </div>
 
-<button class="plus" onclick="toggleMenu()">+</button>
+<!-- ADD BUTTON -->
+<button class="addBtn" onclick="togglePopup()">+</button>
 
-<div class="menu" id="menu">
-  <div onclick="createTask()">Task</div>
+<!-- POPUP -->
+<div id="popup">
+  <div onclick="createTaskUI()">Task</div>
   <div onclick="createSection()">Section</div>
 </div>
 
 <script>
 
-/* DATA */
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+/* NAV */
+function show(id){
+  document.querySelectorAll(".main > div").forEach(d=>d.style.display="none");
+  document.getElementById(id).style.display="block";
+}
+
+/* TIMER */
+let time=1500;
+let running=false;
+
+function startTimer(){
+  if(running) return;
+  running=true;
+
+  let interval=setInterval(()=>{
+    time--;
+    let m=Math.floor(time/60);
+    let s=time%60;
+    document.getElementById("timer").innerText=
+      `${m}:${s<10?"0":""}${s}`;
+
+    if(time<=0){
+      clearInterval(interval);
+      running=false;
+      time=1500;
+    }
+  },1000);
+}
+
+/* POPUP */
+function togglePopup(){
+  let p=document.getElementById("popup");
+  p.style.display = p.style.display==="block" ? "none" : "block";
+}
+
+/* NOTES DATA */
 let sections = JSON.parse(localStorage.getItem("sections")) || [];
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
 /* SAVE */
 function save(){
-  localStorage.setItem("tasks", JSON.stringify(tasks));
   localStorage.setItem("sections", JSON.stringify(sections));
+  localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-/* NAV */
-function show(page){
-  ["home","notes","settings"].forEach(id=>{
-    document.getElementById(id).style.display="none";
-  });
-  document.getElementById(page).style.display="block";
-  render();
-}
-
-/* MENU */
-function toggleMenu(){
-  let m=document.getElementById("menu");
-  m.style.display = m.style.display==="block"?"none":"block";
-}
-
-/* ADD */
+/* CREATE SECTION */
 function createSection(){
   let name = prompt("Section name");
   if(!name) return;
 
-  sections.push({id:Date.now(),name,open:true});
+  sections.push({id:Date.now(), name});
   save();
   render();
 }
 
-function createTask(sectionId=null){
-  let text = prompt("Task");
+/* CREATE TASK */
+function createTaskUI(sectionId=null){
+  togglePopup();
+
+  let text = prompt("Task?");
   if(!text) return;
 
   let date = prompt("Due date YYYY-MM-DD");
@@ -201,123 +235,88 @@ function createTask(sectionId=null){
     id:Date.now(),
     text,
     date,
-    sectionId,
-    done:false
+    sectionId
   });
 
-  save();
-  render();
-}
-
-/* TOGGLE */
-function toggleSection(id){
-  let s=sections.find(x=>x.id===id);
-  s.open=!s.open;
-  save();
-  render();
-}
-
-function toggleTask(id){
-  let t=tasks.find(x=>x.id===id);
-  t.done=!t.done;
-  save();
-  render();
-}
-
-/* DELETE */
-function deleteTask(id){
-  tasks = tasks.filter(t=>t.id!==id);
   save();
   render();
 }
 
 /* RENDER */
 function render(){
-  let el=document.getElementById("notes");
-  el.innerHTML="";
+  let container=document.getElementById("sections");
+  container.innerHTML="";
 
   sections.forEach(sec=>{
-    let box=document.createElement("div");
+    let div=document.createElement("div");
+    div.className="section";
 
-    box.innerHTML = `
-      <div class="section-header">
-        <span onclick="toggleSection(${sec.id})">
-          ${sec.open ? "▼" : "▶"} ${sec.name}
-        </span>
-        <button onclick="createTask(${sec.id})">+</button>
+    div.innerHTML=`
+      <div class="section-title">
+        ${sec.name}
+        <button onclick="createTaskUI(${sec.id})">+</button>
       </div>
+      <div id="tasks-${sec.id}"></div>
     `;
 
-    if(sec.open){
-      tasks.filter(t=>t.sectionId===sec.id && !t.done).forEach(t=>{
-        box.innerHTML += taskHTML(t);
-      });
-    }
+    container.appendChild(div);
 
-    el.appendChild(box);
-  });
+    let taskDiv=document.getElementById(`tasks-${sec.id}`);
 
-  /* NO SECTION */
-  tasks.filter(t=>!t.sectionId && !t.done).forEach(t=>{
-    el.innerHTML += taskHTML(t);
-  });
+    tasks.filter(t=>t.sectionId===sec.id)
+    .forEach(t=>{
+      let el=document.createElement("div");
+      el.className="taskItem";
 
-  /* COMPLETED */
-  let done = tasks.filter(t=>t.done);
-  if(done.length){
-    el.innerHTML += "<h3>Completed</h3>";
-    done.forEach(t=>{
-      el.innerHTML += taskHTML(t);
+      el.innerHTML=`
+        <span>${t.text}</span>
+        <input type="date" value="${t.date||""}" 
+        onchange="updateDate(${t.id}, this.value)">
+      `;
+
+      taskDiv.appendChild(el);
     });
-  }
+  });
 }
 
-/* TASK HTML */
-function taskHTML(t){
-  return `
-    <div class="task">
-      <span onclick="toggleTask(${t.id})">
-        ${t.done ? "✔" : "○"} ${t.text}
-      </span>
-      <small>${t.date || ""}</small>
-      <button onclick="deleteTask(${t.id})">x</button>
-    </div>
-  `;
+/* UPDATE DATE */
+function updateDate(id, val){
+  let t=tasks.find(x=>x.id===id);
+  t.date=val;
+  save();
 }
 
-/* BACKGROUNDS */
-function setBg(type){
-  let url={
-    tokyo:"https://images.unsplash.com/photo-1505060895624-73cc6d3c8c6e",
-    cafe:"https://images.unsplash.com/photo-1509042239860-f550ce710b93",
-    garden:"https://images.unsplash.com/photo-1466692476868-aef1dfb1e735"
-  }[type];
-
-  document.body.style.backgroundImage=`url(${url})`;
-  localStorage.setItem("bg", url);
-}
-
-/* UPLOAD BG */
+/* SETTINGS */
 function uploadBg(e){
   let file=e.target.files[0];
   let reader=new FileReader();
 
-  reader.onload=function(x){
-    document.body.style.backgroundImage=`url(${x.target.result})`;
-    localStorage.setItem("bg", x.target.result);
+  reader.onload=function(){
+    document.body.style.backgroundImage=`url(${reader.result})`;
+    localStorage.setItem("bg", reader.result);
   };
 
   reader.readAsDataURL(file);
 }
 
-/* LOAD BG */
-let savedBg = localStorage.getItem("bg");
-if(savedBg){
-  document.body.style.backgroundImage=`url(${savedBg})`;
+function setAccent(c){
+  document.documentElement.style.setProperty("--accent", hexToRGBA(c, 0.25));
 }
 
-/* INIT */
-render();
+function hexToRGBA(hex, alpha){
+  let r=parseInt(hex.slice(1,3),16);
+  let g=parseInt(hex.slice(3,5),16);
+  let b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/* LOAD */
+window.onload=function(){
+  let bg=localStorage.getItem("bg");
+  if(bg) document.body.style.backgroundImage=`url(${bg})`;
+
+  render();
+}
 
 </script>
 
